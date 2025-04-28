@@ -1,0 +1,4 @@
+obj
+*.o
+ft_ls
+a.out
