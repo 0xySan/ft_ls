@@ -6,11 +6,12 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:04:49 by etaquet           #+#    #+#             */
-/*   Updated: 2025/04/21 16:06:05 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/04 22:22:57 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
+#include <string.h>
 
 bool	file_exists(char *filename)
 {
@@ -86,114 +87,6 @@ int count_files(char **av)
 	return count;
 }
 
-static int	ft_tolower(int c)
-{
-	if (c >= 'A' && c <= 'Z')
-		return (c + 32);
-	return (c);
-}
-
-static const char	*skip_punctuation(const char *s)
-{
-	while (*s && ((*s >= 0 && *s <= 47) || (*s >= 58 && *s <= 64) ||
-		(*s >= 91 && *s <= 96) || (*s >= 123 && *s <= 127)))
-		s++;
-	return (s);
-}
-
-static int	ft_strcoll_like(const char *s1, const char *s2)
-{
-	s1 = skip_punctuation(s1);
-	s2 = skip_punctuation(s2);
-	while (*s1 && *s2)
-	{
-		if (ft_tolower(*s1) != ft_tolower(*s2))
-			return (ft_tolower(*s1) - ft_tolower(*s2));
-		s1++;
-		s2++;
-	}
-	return (ft_tolower(*s1) - ft_tolower(*s2));
-}
-
-static void	ft_swap(char **a, char **b)
-{
-	char	*tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-
-static void	ft_sort_like_ls(char **arr, int count)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (i < count - 1)
-	{
-		j = 0;
-		while (j < count - i - 1)
-		{
-			if (ft_strcoll_like(arr[j], arr[j + 1]) > 0)
-				ft_swap(&arr[j], &arr[j + 1]);
-			j++;
-		}
-		i++;
-	}
-}
-
-void ft_print_dir_entries(DIR *dir, t_flags *flags)
-{
-	struct dirent *entry;
-	char **entries = NULL;
-	int count = 0;
-	int i;
-
-	entry = readdir(dir);
-	while (entry != NULL)
-	{
-		if (strncmp(entry->d_name, ".", 1) == 0 && flags->all == 0)
-		{
-			entry = readdir(dir);
-			continue;
-		}
-		if (entry->d_type != DT_REG && entry->d_type != DT_DIR)
-		{
-			entry = readdir(dir);
-			continue;
-		}
-		entries = realloc(entries, sizeof(char *) * (count + 1));
-		entries[count++] = ft_strdup(entry->d_name);
-		entry = readdir(dir);
-	}
-	ft_sort_like_ls(entries, count);
-	i = 0;
-	if (flags->reverse)
-	{
-		i = count - 1;
-		while (i >= 0)
-		{
-			ft_putstr_fd(entries[i], 1);
-			if (i - 1 >= 0)
-				ft_putstr_fd(" ", 1);
-			free(entries[i]);
-			i--;
-		}
-		ft_putstr_fd("\n", 1);
-		free(entries);
-		return ;
-	}
-	while (i < count)
-	{
-		ft_putstr_fd(entries[i], 1);
-		if (i + 1 < count)
-			ft_putstr_fd(" ", 1);
-		free(entries[i]);
-		i++;
-	}
-	free(entries);
-	ft_putstr_fd("\n", 1);
-}
-
 void init_flags(t_flags *flags)
 {
 	flags->recursive = 0;
@@ -202,6 +95,7 @@ void init_flags(t_flags *flags)
 	flags->time_sort = 0;
 	flags->all = 0;
 	flags->file_count = 0;
+	flags->colors = 0;
 	flags->dir_name = NULL;
 	flags->dir_flag = false;
 }
@@ -218,6 +112,8 @@ int check_flags(char **av, t_flags *flags, int i, int j)
 		flags->reverse = 1;
 	else if (av[i][j] == 't')
 		flags->time_sort = 1;
+	else if (av[i][j] == 'c')
+		flags->colors = 1;
 	else
 	{
 		ft_putstr_fd(av[0], 2);
@@ -231,41 +127,14 @@ int check_flags(char **av, t_flags *flags, int i, int j)
 	return (0);
 }
 
-int print_files(int count, t_flags *flags)
-{
-	if (count > 0)
-	{
-		int z = 0;
-		ft_sort_like_ls(flags->files, count);
-		while (z < count)
-		{
-			printf("%s ", flags->files[z++]);
-			free(flags->files[z - 1]);
-		}
-		printf("\n");
-	}
-	else
-	{
-		DIR *dir;
-
-		dir = opendir(".");
-		if (dir == NULL)
-			return (1);
-		ft_print_dir_entries(dir, flags);
-		free(dir);
-	}
-	return (0);
-}
-
 int check_flags_loop(char **av, t_flags *flags, int i)
 {
 	int j;
 
-	
 	if (strcmp(av[i], "--help") == 0)
 	{
 		put_message_help(av[0]);
-		return (0);
+		return (2);
 	}
 	j = 1;
 	while (av[i][j])
@@ -277,13 +146,193 @@ int check_flags_loop(char **av, t_flags *flags, int i)
 	return (0);
 }
 
-void exit_help(int code, t_flags *flags)
+void exit_help(int code, t_flags *flags, int count)
 {
-	(void)flags;
+	int i;
+
+	i = 0;
+	if (code == 0)
+		return ;
+	while (i < count)
+	{
+		free(flags->files[i]);
+		i++;
+	}
+	free(flags->files);
+	free(flags);
 	if (code == 1)
 		exit(1);
 	else if (code == 2)
 		exit(0);
+}
+
+void	malloc_and_put_files(char ***files, DIR *dir, t_flags *flags, const char *bp)
+{
+	int				count;
+	struct dirent	*entry;
+	char			**real_path;
+
+	count = 0;
+	while ((entry = readdir(dir)) != NULL)
+	{
+		if (strncmp(entry->d_name, ".", 1) == 0 && !flags->all)
+			continue ;
+		count++;
+	}
+	*files = malloc(sizeof(char *) * (count + 1));
+	if (flags->time_sort)
+			real_path = malloc(sizeof(char *) * (count + 1));
+	rewinddir(dir);
+	count = 0;
+	while ((entry = readdir(dir)) != NULL)
+	{
+		if (strncmp(entry->d_name, ".", 1) == 0 && !flags->all)
+			continue ;
+		(*files)[count] = strdup(entry->d_name);
+		if (flags->time_sort)
+			real_path[count] = get_real_path(bp, entry->d_name);
+		count++;
+	}
+	(*files)[count] = NULL;
+	if (!flags->time_sort)
+		quicksort(*files, 0, count - 1);
+	else
+	{
+		real_path[count] = NULL;
+		timesort(*files, real_path, 0, count - 1);
+		int i = -1;
+		while(real_path[++i])
+			free(real_path[i]);
+		free(real_path);
+	}
+	if (flags->reverse)
+	{
+		for (int i = 0; i < count / 2; i++)
+		{
+			char *tmp = (*files)[i];
+			(*files)[i] = (*files)[count - 1 - i];
+			(*files)[count - 1 - i] = tmp;
+		}
+	}
+}
+
+void recursive_ls(const char *base_path, t_flags *flags)
+{
+	DIR				*dir;
+	struct stat		st;
+	char			path[PATH_MAX];
+	int				len;
+	int				count;
+	char			**files;
+	int				i;
+
+	count = 0;
+	i = 0;
+	dir = opendir(base_path);
+	if (!dir)
+		return ;
+	if (flags->file_count - 1 >= 1 || flags->recursive)
+		printf("%s:\n", base_path);
+	malloc_and_put_files(&files, dir, flags, base_path);
+	closedir(dir);
+	while (files[i])
+	{
+		if (strncmp(files[i], ".", 1) == 0 && !flags->all)
+			continue ;
+		if (flags->colors)
+		{
+			if (is_directory(base_path, files[i]))
+				printf("\033[0;34m%s  \033[0m", files[i]);
+			else
+				printf("%s  ", files[i]);
+		}
+		else
+			printf("%s  ", files[i]);
+		i++;
+		count++;
+	}
+	if (count >= 1)
+		printf("\n");
+	i = 0;
+	while (files[i])
+	{
+		if (strcmp(files[i], ".") == 0 || strcmp(files[i], "..") == 0)
+		{
+			i++;
+			continue ;
+		}
+		len = strlen(base_path);
+		strcpy(path, base_path);
+		if (base_path[len - 1] != '/')
+			strcat(path, "/");
+		strcat(path, files[i]);
+		if (stat(path, &st) == 0 && S_ISDIR(st.st_mode) && !is_symlink(path))
+		{
+			if (flags->recursive && count >= 1)
+				printf("\n");
+			if (flags->recursive)
+				recursive_ls(path, flags);
+		}
+		i++;
+	}
+	i = 0;
+	while (files[i])
+		free(files[i++]);
+	free(files);
+}
+
+int	do_flags(t_flags *flags)
+{
+	int i;
+	int count;
+
+	i = -1;
+	count = 0;
+	if (flags->recursive && flags->file_count >= 1)
+	{
+		while (flags->files[++i])
+		{
+			if (is_directory(NULL, flags->files[i]))
+				continue ;
+			printf("%s  ", flags->files[i]);
+			count++;
+		}
+		if (count >= 1)
+			printf("\n");
+		i = -1;
+		while (flags->files[++i])
+		{
+			if (!is_directory(NULL, flags->files[i]))
+				continue ;
+			if (count >= 1)
+				printf("\n");
+			recursive_ls(flags->files[i], flags);
+			count++;
+		}
+	}
+	else
+	{
+		while (flags->files[++i])
+		{
+			if (is_directory(NULL, flags->files[i]))
+				continue ;
+			printf("%s  ", flags->files[i]);
+			count++;
+		}
+		if (count >= 1)
+			printf("\n");
+		i = -1;
+		while (flags->files[++i])
+		{
+			if (!is_directory(NULL, flags->files[i]))
+				continue ;
+			if (count >= 1)
+				printf("\n");
+			recursive_ls(flags->files[i], flags);
+			count++;
+		}
+	}
+	return (1);
 }
 
 int	main(int ac, char **av)
@@ -291,7 +340,6 @@ int	main(int ac, char **av)
 	int		i;
 	int		exit_code;
 	t_flags	*flags;
-	int		count;
 
 	flags = malloc(sizeof(t_flags));
 	if (!flags)
@@ -300,27 +348,34 @@ int	main(int ac, char **av)
 	init_flags(flags);
 	i = 1;
 	exit_code = 0;
-	count = 0;
+	flags->file_count = 0;
 	while (i < ac)
 	{
 		if (av[i][0] == '-')
-			exit_help(check_flags_loop(av, flags, i), flags);
+			exit_help(check_flags_loop(av, flags, i), flags, flags->file_count);
 		else
 		{
 			if (file_exists(av[i]) == false)
 			{
-				exit_code = 1;
+				exit_code = 2;
 				ft_putstr_fd(av[0], 2);
 				ft_putstr_fd(": cannot access '", 2);
 				ft_putstr_fd(av[i], 2);
 				ft_putstr_fd("': No such file or directory\n", 2);
 			}
 			else
-				flags->files[count++] = ft_strdup(av[i]);
+				flags->files[flags->file_count++] = ft_strdup(av[i]);
 		}
 		i++;
 	}
-	print_files(count, flags);
+	if (flags->file_count < 1 && exit_code == 0)
+		flags->files[flags->file_count++] = ft_strdup(".");
+	flags->files[flags->file_count] = NULL;
+	quicksort(flags->files, 0, flags->file_count - 1);
+	do_flags(flags);
+	i = -1;
+	while (flags->files[++i])
+		free(flags->files[i]);
 	free(flags->files);
 	free(flags);
 	return (exit_code);
