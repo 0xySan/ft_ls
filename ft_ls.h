@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/04 22:14:45 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/05 15:25:07 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 # include <sys/types.h>
 # include <dirent.h>
 # include <ctype.h>
+# include <grp.h>
+# include <pwd.h>
+# include <time.h>
 
 typedef struct s_flags
 {
@@ -37,14 +40,27 @@ typedef struct s_flags
 	bool	dir_flag;
 }   t_flags;
 
-void	quicksort(char *arr[], int low, int high);
-int		is_directory(const char *base_path, const char *path);
+typedef struct s_files
+{
+	char		**files;
+	char		**real_paths;
+	struct stat	*stats;
+	size_t		file_count;
+}	t_files;
+
+void	quicksort(char *arr[], char *rp[], struct stat stats[], int low, int high);
+int		is_directory(const char *path);
 int		is_executable_file(const char *path);
 int		is_symlink(const char *path);
 char	*get_real_path(const char *base_path, const char *path);
 void	swap(char **a, char **b);
-void	timesort(char *names[], char *realpaths[], int low, int high);
+void	timesort(char *names[], char *realpaths[], struct stat stats[], int low, int high);
 size_t	get_mtime(const char *path);
 int		str_lower_cmp(const char *a, const char *b);
+size_t	getBlockSize(t_files *files);
+void	getPerms(struct stat st);
+void	print_link_count(char *path);
+void	swap_stat(struct stat *a, struct stat *b);
+void	getSymlink(struct stat st, char *path);
 
 #endif

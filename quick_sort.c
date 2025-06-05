@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 11:08:00 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/04 12:45:08 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/05 14:11:58 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	str_lower_cmp(const char *a, const char *b)
 	return (tolower((unsigned char)*a) - tolower((unsigned char)*b));
 }
 
-int	partition(char *arr[], int low, int high)
+int	partition(char *arr[], char *rp[], struct stat stats[], int low, int high)
 {
 	char	*pivot;
 	int		i;
@@ -57,20 +57,24 @@ int	partition(char *arr[], int low, int high)
 		{
 			i++;
 			swap(&arr[i], &arr[j]);
+			swap(&rp[i], &rp[j]);
+			swap_stat(&stats[i], &stats[j]);
 		}
 	}
 	swap(&arr[i + 1], &arr[high]);
+	swap(&rp[i + 1], &rp[high]);
+	swap_stat(&stats[i + 1], &stats[high]);
 	return (i + 1);
 }
 
-void	quicksort(char *arr[], int low, int high)
+void	quicksort(char *arr[], char *rp[], struct stat stats[], int low, int high)
 {
 	int	pi;
 
 	if (low < high)
 	{
-		pi = partition(arr, low, high);
-		quicksort(arr, low, pi - 1);
-		quicksort(arr, pi + 1, high);
+		pi = partition(arr, rp, stats, low, high);
+		quicksort(arr, rp, stats, low, pi - 1);
+		quicksort(arr, rp, stats, pi + 1, high);
 	}
 }

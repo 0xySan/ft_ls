@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 11:09:00 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/04 12:03:48 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/05 12:28:55 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,29 +43,11 @@ char *get_real_path(const char *base_path, const char *path)
 	return (real_path);
 }
 
-int	is_directory(const char *base_path, const char *path)
+int	is_directory(const char *path)
 {
 	struct stat	st;
-	char		*real_path;
 
-	if (!path)
+	if (stat(path, &st) != 0)
 		return 0;
-	if (base_path == NULL)
-	{
-		if (stat(path, &st) != 0)
-			return 0;
-		return S_ISDIR(st.st_mode);
-	}
-	else
-	{
-		real_path = malloc(sizeof(char) * (strlen(base_path) + strlen(path) + 2));
-		strcpy(real_path, base_path);
-		if (real_path[strlen(real_path) - 1] != '/')
-			strcat(real_path, "/");
-		strcat(real_path, path);
-		if (stat(real_path, &st) != 0)
-			return (free(real_path), 0);
-		free(real_path);
-		return S_ISDIR(st.st_mode);
-	}
+	return S_ISDIR(st.st_mode);
 }
