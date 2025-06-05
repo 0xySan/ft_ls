@@ -6,12 +6,11 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:04:49 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/05 15:26:09 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/05 18:01:24 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
-#include <string.h>
 
 bool	file_exists(char *filename)
 {
@@ -52,12 +51,7 @@ char *ft_strdup(const char *s1)
 	return (copy);
 }
 
-void	ft_putstr_fd(const char *str, int fd)
-{
-	write(fd, str, ft_strlen(str));
-}
-
-void	put_message_help(const char *str)
+void	put_message_help(char *str)
 {
 	ft_putstr_fd("Usage: ", 1);
 	ft_putstr_fd(str, 1);
@@ -179,8 +173,14 @@ void	malloc_and_put_files(t_files *files, DIR *dir, t_flags *flags, const char *
 		count++;
 	}
 	files->files = malloc(sizeof(char *) * (count + 1));
+	if (!files->files)
+		exit(1);
 	files->real_paths = malloc(sizeof(char *) * (count + 1));
+	if (!files->real_paths)
+		exit(1);
 	files->stats = calloc(count, sizeof(struct stat));
+	if (!files->stats)
+		exit(1);
 	rewinddir(dir);
 	count = 0;
 	while ((entry = readdir(dir)) != NULL)
@@ -231,10 +231,10 @@ void recursive_ls(const char *base_path, t_flags *flags)
 	if (!dir)
 		return ;
 	if (flags->file_count - 1 >= 1 || flags->recursive)
-		printf("%s:\n", base_path);
+		ft_dprintf(1, "%s:\n", base_path);
 	malloc_and_put_files(&files, dir, flags, base_path);
 	if (flags->long_format)
-		printf("Total %lu\n", getBlockSize(&files));
+		dprintf(1, "Total %lu\n", getBlockSize(&files));
 	closedir(dir);
 	while (files.files[++i])
 	{
@@ -243,23 +243,24 @@ void recursive_ls(const char *base_path, t_flags *flags)
 		if (flags->long_format)
 		{
 			getPerms(files.stats[i]);
-			dprintf(1, "%s", files.files[i]);
-			getSymlink(files.stats[i], files.real_paths[i]);
+			ft_dprintf(1, "%s", files.files[i]);
+			if (S_ISLNK(files.stats[i].st_mode))
+				getSymlink(files.stats[i], files.real_paths[i]);
 			write(1, "\n", 1);
 		}
 		else if (flags->colors)
 		{
 			if (is_directory(files.real_paths[i]))
-				printf("\033[0;34m%s  \033[0m", files.files[i]);
+				dprintf(1, "\033[0;34m%s  \033[0m", files.files[i]);
 			else
-				printf("%s  ", files.files[i]);
+				ft_dprintf(1, "%s  ", files.files[i]);
 		}
 		else
-			printf("%s  ", files.files[i]);
+			ft_dprintf(1, "%s  ", files.files[i]);
 		count++;
 	}
 	if (count >= 1 && !flags->long_format)
-		printf("\n");
+		ft_dprintf(1, "\n");
 	i = -1;
 	while (files.files[++i])
 	{
@@ -272,7 +273,7 @@ void recursive_ls(const char *base_path, t_flags *flags)
 		if (is_directory(files.real_paths[i]) && !S_ISLNK(files.stats[i].st_mode))
 		{
 			if (flags->recursive && count >= 1)
-				printf("\n");
+				ft_dprintf(1, "\n");
 			if (flags->recursive)
 				recursive_ls(files.real_paths[i], flags);
 		}
@@ -298,18 +299,18 @@ int	do_flags(t_flags *flags)
 		{
 			if (is_directory(flags->files[i]))
 				continue ;
-			printf("%s  ", flags->files[i]);
+			ft_dprintf(1, "%s  ", flags->files[i]);
 			count++;
 		}
 		if (count >= 1)
-			printf("\n");
+			ft_dprintf(1, "\n");
 		i = -1;
 		while (flags->files[++i])
 		{
 			if (!is_directory(flags->files[i]))
 				continue ;
 			if (count >= 1)
-				printf("\n");
+				ft_dprintf(1, "\n");
 			recursive_ls(flags->files[i], flags);
 			count++;
 		}
@@ -320,18 +321,18 @@ int	do_flags(t_flags *flags)
 		{
 			if (is_directory(flags->files[i]))
 				continue ;
-			printf("%s  ", flags->files[i]);
+			ft_dprintf(1, "%s  ", flags->files[i]);
 			count++;
 		}
 		if (count >= 1)
-			printf("\n");
+			ft_dprintf(1, "\n");
 		i = -1;
 		while (flags->files[++i])
 		{
 			if (!is_directory(flags->files[i]))
 				continue ;
 			if (count >= 1)
-				printf("\n");
+				ft_dprintf(1, "\n");
 			recursive_ls(flags->files[i], flags);
 			count++;
 		}
@@ -349,6 +350,8 @@ int	main(int ac, char **av)
 	if (!flags)
 		return (1);
 	flags->files = malloc(sizeof(char *) * (count_files(av) + 1));
+	if (!flags->files)
+		return (1);
 	init_flags(flags);
 	i = 1;
 	exit_code = 0;

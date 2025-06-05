@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/05 15:25:07 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/05 17:40:34 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 # include <grp.h>
 # include <pwd.h>
 # include <time.h>
+# include "ft_dprintf/ft_printf.h"
 
 typedef struct s_flags
 {
@@ -47,6 +48,13 @@ typedef struct s_files
 	struct stat	*stats;
 	size_t		file_count;
 }	t_files;
+
+typedef struct s_uid_gid_cache {
+    uid_t last_uid;
+    gid_t last_gid;
+    const char *pw_name;
+    const char *gr_name;
+} t_cache;
 
 void	quicksort(char *arr[], char *rp[], struct stat stats[], int low, int high);
 int		is_directory(const char *path);
