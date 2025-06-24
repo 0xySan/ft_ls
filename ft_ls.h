@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/05 17:40:34 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/06/24 20:17:29 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,13 @@ typedef struct s_flags
 	int		reverse;
 	int		time_sort;
 	int		all;
-	int		colors;
 	char	**files;
 	int		file_count;
 	char	*dir_name;
+	int		error_code;
+	int		last_code;
 	bool	dir_flag;
-}   t_flags;
+}	t_flags;
 
 typedef struct s_files
 {
@@ -49,26 +50,42 @@ typedef struct s_files
 	size_t		file_count;
 }	t_files;
 
-typedef struct s_uid_gid_cache {
-    uid_t last_uid;
-    gid_t last_gid;
-    const char *pw_name;
-    const char *gr_name;
-} t_cache;
+typedef struct s_uid_gid_cache
+{
+	uid_t		last_uid;
+	gid_t		last_gid;
+	const char	*pw_name;
+	const char	*gr_name;
+}	t_cache;
 
-void	quicksort(char *arr[], char *rp[], struct stat stats[], int low, int high);
+void	quicksort(t_files *files, int low, int high);
 int		is_directory(const char *path);
 int		is_executable_file(const char *path);
 int		is_symlink(const char *path);
 char	*get_real_path(const char *base_path, const char *path);
 void	swap(char **a, char **b);
-void	timesort(char *names[], char *realpaths[], struct stat stats[], int low, int high);
-size_t	get_mtime(const char *path);
-int		str_lower_cmp(const char *a, const char *b);
-size_t	getBlockSize(t_files *files);
-void	getPerms(struct stat st);
-void	print_link_count(char *path);
+void	timesort(t_files *files, int low, int high);
+size_t	getblocksize(t_files *files);
+void	getperms(struct stat st);
 void	swap_stat(struct stat *a, struct stat *b);
-void	getSymlink(struct stat st, char *path);
+void	getsymlink(struct stat st, char *path);
+char	*ft_strdup(const char *s1);
+int		ft_strlen(const char *str);
+bool	file_exists(char *filename);
+void	print_mod_time(struct stat st);
+void	print_file_type(mode_t mode);
+void	putchar_perm(int cond, char c);
+int		count_files(char **av);
+void	recursive_ls(const char *base_path, t_flags *flags);
+void	malloc_and_put_files(t_files *t, DIR *d,
+			t_flags *f, const char *bp);
+void	exit_help(int code, t_flags *flags, int count);
+int		check_flags_loop(char **av, t_flags *flags, int i);
+int		check_flags(char **av, t_flags *flags, int i, int j);
+void	init_flags(t_flags *flags);
+void	put_message_help(char *str);
+void	timesort_files(char **files, int low, int high);
+void	quicksort_files(char **files, int low, int high);
+int		str_lower_cmp(const char *a, const char *b);
 
 #endif
