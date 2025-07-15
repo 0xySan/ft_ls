@@ -6,11 +6,28 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:04:49 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 20:11:42 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/07/15 18:59:54 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
+
+void	do_other_flag(t_flags *flags, int i)
+{
+	struct stat	st;
+
+	if (lstat(flags->files[i], &st) != 0)
+		return ;
+	if (flags->long_format)
+	{
+		getperms(st);
+		ft_dprintf(1, "%s", flags->files[i]);
+		if (S_ISLNK(st.st_mode))
+			getsymlink(st, flags->files[i]);
+	}
+	else
+		ft_dprintf(1, "%s  ", flags->files[i]);
+}
 
 void	do_recursive_flag(t_flags *flags)
 {
@@ -21,9 +38,9 @@ void	do_recursive_flag(t_flags *flags)
 	i = -1;
 	while (flags->files[++i])
 	{
-		if (is_directory(flags->files[i]))
+		if (is_directory(flags->files[i]) && !is_symlink(flags->files[i]))
 			continue ;
-		ft_dprintf(1, "%s  ", flags->files[i]);
+		do_other_flag(flags, i);
 		count++;
 	}
 	if (count >= 1)
@@ -31,7 +48,7 @@ void	do_recursive_flag(t_flags *flags)
 	i = -1;
 	while (flags->files[++i])
 	{
-		if (!is_directory(flags->files[i]))
+		if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
 			continue ;
 		if (count >= 1)
 			ft_dprintf(1, "\n");
@@ -54,7 +71,7 @@ void	do_flags(t_flags *flags)
 		i = -1;
 		while (flags->files[++i])
 		{
-			if (!is_directory(flags->files[i]))
+			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
 				continue ;
 			if (count >= 1)
 				ft_dprintf(1, "\n");

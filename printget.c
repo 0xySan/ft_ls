@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 18:41:33 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 19:38:12 by etaquet          ###   ########.fr       */
+/*   Updated: 2025/07/15 19:08:51 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,32 @@ void	print_file_type(mode_t mode)
 
 void	print_mod_time(struct stat st)
 {
-	char		*timestr;
+	char		*file_time;
+	char		*file_time_copy;
+	char		*curr_time;
+	time_t		now;
+	int			i;
 
-	timestr = ctime(&st.st_mtime);
-	write(1, timestr + 4, 12);
-	ft_dprintf(1, " ");
+	file_time = ctime(&st.st_mtime);
+	file_time_copy = malloc(26);
+	if (!file_time_copy)
+		return ;
+	i = -1;
+	while (++i < 26)
+		file_time_copy[i] = file_time[i];
+	time(&now);
+	curr_time = ctime(&now);
+	if (file_time_copy[20] == curr_time[20] &&
+		file_time_copy[21] == curr_time[21] &&
+		file_time_copy[22] == curr_time[22] &&
+		file_time_copy[23] == curr_time[23])
+		write(1, file_time_copy + 4, 12);
+	else
+	{
+		write(1, file_time_copy + 4, 6);
+		write(1, "  ", 2);
+		write(1, file_time_copy + 20, 4);
+	}
+	write(1, " ", 1);
+	free(file_time_copy);
 }
