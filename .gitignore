@@ -2,3 +2,4 @@ obj
 *.o
 ft_ls
 a.out
+ft_dprintf/dprintf.a
