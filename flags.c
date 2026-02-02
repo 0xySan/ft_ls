@@ -58,8 +58,6 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 		ft_putstr_fd(": illegal option -- '", 2);
 		write(1, &av[i][j], 2);
 		ft_putstr_fd("'\nTry 'ft_ls --help' for more informations.\n", 2);
-		free(flags->files);
-		free(flags);
 		return (1);
 	}
 	return (0);
