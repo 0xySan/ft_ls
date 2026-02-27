@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
-SRCS_FILE = ft_dprintf.c ft_puts.c print_format.c put_unit_ptr.c
+SRCS_FILE = ft_dprintf.c ft_puts.c print_format.c put_unit_ptr.c ft_buffer.c
 
 SRCS = $(addprefix ./,$(SRCS_FILE))
 

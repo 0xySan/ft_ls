@@ -30,6 +30,7 @@
 # include <sys/xattr.h>
 # include <sys/ioctl.h>
 # include "ft_dprintf/ft_dprintf.h"
+# include "libft/libft.h"
 
 typedef struct s_flags
 {
@@ -38,6 +39,8 @@ typedef struct s_flags
 	int		group;
 	int 	directory;
 	int		reverse;
+	int		size;
+	int		human_readable;
 	int		time_sort;
 	int		not_sorted;
 	int		color;
@@ -82,12 +85,12 @@ char	*get_real_path(const char *base_path, const char *path);
 void	swap(char **a, char **b);
 void	timesort(t_files *files, int low, int high);
 size_t	getblocksize(t_files *files);
-void	getperms(struct stat st, const char *path, int group, t_colwidths cw);
+void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw);
 void	swap_stat(struct stat *a, struct stat *b);
-void	print_columns(char **names, int count);
-void	getsymlink(struct stat st, char *path);
-char	*ft_strdup(const char *s1);
-int		ft_strlen(const char *str);
+void	print_columns(char **nm, int cnt, struct stat *st, int col);
+void	getsymlink(struct stat st, char *path, int color);
+const char	*get_color_code(struct stat *st);
+void	print_color_name(const char *name, struct stat *st, int color);
 bool	file_exists(char *filename);
 void	print_mod_time(struct stat st);
 void	print_file_type(mode_t mode);
@@ -107,6 +110,8 @@ int		str_lower_cmp(const char *a, const char *b);
 int		count_digits(unsigned long n);
 void	print_padded_num(unsigned long n, int width);
 void	print_padded_str(const char *s, int width);
-t_colwidths	init_colwidths(t_files *files, int group, int all);
+char 	*get_size_human_readable(off_t size);
+t_colwidths	init_colwidths(t_files *files, int group, int all, int human);
+char		*getblocksize_human_readable(t_files *files);
 
 #endif

@@ -14,7 +14,7 @@
 
 int	ft_putchar(int fd, int c)
 {
-	return (write (fd, &c, 1));
+	return (buf_write(fd, (char *)&c, 1));
 }
 
 int	ft_putstring(int fd, char *str)
@@ -25,10 +25,8 @@ int	ft_putstring(int fd, char *str)
 		str = "(null)";
 	i = 0;
 	while (str[i] != '\0')
-	{
-		write(fd, &str[i], 1);
 		i++;
-	}
+	buf_write(fd, str, i);
 	return (i);
 }
 
@@ -43,7 +41,7 @@ int	ft_putnumber(int fd, long n, int base)
 		return (ft_putchar(fd, '0'));
 	if (n == -2147483648)
 	{
-		write (fd, "-2147483648", 11);
+		buf_write(fd, "-2147483648", 11);
 		count = 11;
 		return (count);
 	}
@@ -68,7 +66,7 @@ int	ft_putnumber_caps(int fd, long n, int base)
 	symbols = "0123456789ABCDEF";
 	if (n == -2147483648)
 	{
-		write (fd, "-2147483648", 12);
+		buf_write(fd, "-2147483648", 11);
 		count = 11;
 	}
 	else if (n < 0)

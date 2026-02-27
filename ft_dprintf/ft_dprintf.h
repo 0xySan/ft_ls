@@ -16,6 +16,8 @@
 # include <stdarg.h>
 # include <unistd.h>
 
+# define BUF_SIZE 8192
+
 int	ft_dprintf(int fd, const char *format, ...);
 int	ft_putchar(int fd, int c);
 int	ft_putnumber(int fd, long n, int base);
@@ -24,5 +26,7 @@ int	print_format(int fd, char specifier, va_list ap);
 int	ft_putunit_max(int fd, unsigned long num, int base);
 int	ft_putpointer(int fd, void *pointer);
 int	ft_putstring(int fd, char *str);
+int	buf_write(int fd, const char *s, int len);
+void	buf_flush(int fd);
 
 #endif

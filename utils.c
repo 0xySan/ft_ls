@@ -19,38 +19,6 @@ bool	file_exists(char *filename)
 	return (stat(filename, &buffer) == 0);
 }
 
-int	ft_strlen(const char *str)
-{
-	int	i;
-
-	if (!str)
-		return (0);
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-char	*ft_strdup(const char *s1)
-{
-	char	*copy;
-	int		i;
-
-	if (!s1)
-		return (NULL);
-	copy = malloc(sizeof(char) * (ft_strlen(s1) + 1));
-	if (!copy)
-		return (NULL);
-	i = 0;
-	while (s1[i])
-	{
-		copy[i] = s1[i];
-		i++;
-	}
-	copy[i] = '\0';
-	return (copy);
-}
-
 int	count_files(char **av)
 {
 	int	count;
@@ -82,30 +50,90 @@ int	count_digits(unsigned long n)
 
 void	print_padded_num(unsigned long n, int width)
 {
-	int	digits;
-	int	i;
+	int			pad;
+	static char	spaces[32] = "                                ";
 
-	digits = count_digits(n);
-	i = digits;
-	while (i < width)
-	{
-		write(1, " ", 1);
-		i++;
-	}
+	pad = width - count_digits(n);
+	if (pad > 0 && pad <= 32)
+		buf_write(1, spaces, pad);
 	ft_putunit_max(1, n, 10);
 }
 
 void	print_padded_str(const char *s, int width)
 {
-	int	len;
-	int	i;
+	int			len;
+	int			pad;
+	static char	spaces[64] = "                                "
+		"                                ";
 
 	len = ft_strlen(s);
-	ft_dprintf(1, "%s", s);
-	i = len;
-	while (i < width)
+	buf_write(1, s, len);
+	pad = width - len;
+	while (pad > 0)
 	{
-		write(1, " ", 1);
-		i++;
+		if (pad > 64)
+		{
+			buf_write(1, spaces, 64);
+			pad -= 64;
+		}
+		else
+		{
+			buf_write(1, spaces, pad);
+			pad = 0;
+		}
 	}
+}
+
+static const char	*get_color_dir(mode_t m)
+{
+	if ((m & S_ISVTX) && (m & S_IWOTH))
+		return ("\033[30;42m");
+	if (m & S_IWOTH)
+		return ("\033[34;42m");
+	if (m & S_ISVTX)
+		return ("\033[37;44m");
+	return ("\033[01;34m");
+}
+
+const char	*get_color_code(struct stat *st)
+{
+	mode_t	m;
+
+	m = st->st_mode;
+	if (S_ISDIR(m))
+		return (get_color_dir(m));
+	if (S_ISLNK(m))
+		return ("\033[01;36m");
+	if (S_ISFIFO(m))
+		return ("\033[40;33m");
+	if (S_ISSOCK(m))
+		return ("\033[01;35m");
+	if (S_ISBLK(m))
+		return ("\033[40;33;01m");
+	if (S_ISCHR(m))
+		return ("\033[40;33;01m");
+	if (m & S_ISUID)
+		return ("\033[37;41m");
+	if (m & S_ISGID)
+		return ("\033[30;43m");
+	if (m & (S_IXUSR | S_IXGRP | S_IXOTH))
+		return ("\033[01;32m");
+	return (NULL);
+}
+
+void	print_color_name(const char *name, struct stat *st, int color)
+{
+	const char	*cc;
+
+	cc = NULL;
+	if (color && st)
+		cc = get_color_code(st);
+	if (cc)
+	{
+		buf_write(1, cc, ft_strlen(cc));
+		buf_write(1, name, ft_strlen(name));
+		buf_write(1, "\033[0m", 4);
+	}
+	else
+		buf_write(1, name, ft_strlen(name));
 }

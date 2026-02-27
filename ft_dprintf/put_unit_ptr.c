@@ -30,12 +30,8 @@ int	ft_putunit_max(int fd, unsigned long num, int base)
 		buffer[--i] = digits[num % base];
 		num /= base;
 	}
-	while (buffer[i])
-	{
-		write(fd, &buffer[i], 1);
-		count++;
-		i++;
-	}
+	count = 49 - i;
+	buf_write(fd, buffer + i, count);
 	return (count);
 }
 

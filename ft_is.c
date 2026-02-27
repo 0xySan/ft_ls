@@ -32,16 +32,28 @@ int	is_executable_file(const char *path)
 
 char	*get_real_path(const char *base_path, const char *path)
 {
-	char	*real_path;
+	char	*rp;
+	int		blen;
+	int		plen;
+	int		need_slash;
+	int		i;
 
-	real_path = malloc(sizeof(char) * (ft_strlen(base_path) + ft_strlen(path) + 2));
-	if (!real_path)
+	blen = ft_strlen(base_path);
+	plen = ft_strlen(path);
+	need_slash = (blen > 0 && base_path[blen - 1] != '/');
+	rp = malloc(blen + need_slash + plen + 1);
+	if (!rp)
 		return (NULL);
-	strcpy(real_path, base_path);
-	if (real_path[ft_strlen(real_path) - 1] != '/')
-		strcat(real_path, "/");
-	strcat(real_path, path);
-	return (real_path);
+	i = -1;
+	while (++i < blen)
+		rp[i] = base_path[i];
+	if (need_slash)
+		rp[i++] = '/';
+	blen = -1;
+	while (++blen < plen)
+		rp[i++] = path[blen];
+	rp[i] = '\0';
+	return (rp);
 }
 
 int	is_directory(const char *path)

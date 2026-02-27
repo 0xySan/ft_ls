@@ -15,49 +15,61 @@
 void	putchar_perm(int cond, char c)
 {
 	if (cond)
-		write(1, &c, 1);
+		buf_write(1, &c, 1);
 	else
-		ft_dprintf(1, "-");
+		buf_write(1, "-", 1);
 }
 
 void	print_file_type(mode_t mode)
 {
+	char	c;
+
 	if ((mode & S_IFMT) == S_IFLNK)
-		ft_dprintf(1, "l");
+		c = 'l';
 	else if ((mode & S_IFMT) == S_IFDIR)
-		ft_dprintf(1, "d");
+		c = 'd';
+	else if ((mode & S_IFMT) == S_IFBLK)
+		c = 'b';
+	else if ((mode & S_IFMT) == S_IFCHR)
+		c = 'c';
+	else if ((mode & S_IFMT) == S_IFIFO)
+		c = 'p';
+	else if ((mode & S_IFMT) == S_IFSOCK)
+		c = 's';
 	else
-		ft_dprintf(1, "-");
+		c = '-';
+	buf_write(1, &c, 1);
 }
 
 void	print_mod_time(struct stat st)
 {
-	char		*file_time;
-	char		*file_time_copy;
-	char		*curr_time;
-	time_t		now;
-	int			i;
+	char			*ft;
+	char			copy[26];
+	static time_t	now;
+	static int		year[4];
+	int				i;
 
-	file_time = ctime(&st.st_mtime);
-	file_time_copy = malloc(26);
-	if (!file_time_copy)
-		return ;
+	if (now == 0)
+	{
+		time(&now);
+		ft = ctime(&now);
+		i = -1;
+		while (++i < 4)
+			year[i] = ft[20 + i];
+	}
+	ft = ctime(&st.st_mtime);
 	i = -1;
-	while (++i < 26)
-		file_time_copy[i] = file_time[i];
-	time(&now);
-	curr_time = ctime(&now);
-	if (file_time_copy[20] == curr_time[20] &&
-		file_time_copy[21] == curr_time[21] &&
-		file_time_copy[22] == curr_time[22] &&
-		file_time_copy[23] == curr_time[23])
-		write(1, file_time_copy + 4, 12);
+	while (++i < 25)
+		copy[i] = ft[i];
+	copy[25] = '\0';
+	if (copy[20] == year[0] && copy[21] == year[1]
+		&& copy[22] == year[2] && copy[23] == year[3])
+		buf_write(1, copy + 4, 12);
 	else
 	{
-		write(1, file_time_copy + 4, 6);
-		write(1, "  ", 2);
-		write(1, file_time_copy + 20, 4);
+		buf_write(1, copy + 4, 6);
+		buf_write(1, "  ", 2);
+		buf_write(1, copy + 20, 4);
 	}
-	write(1, " ", 1);
-	free(file_time_copy);
+	buf_write(1, " ", 1);
 }

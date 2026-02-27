@@ -21,17 +21,20 @@ static int	get_term_width(void)
 	return (ws.ws_col);
 }
 
-static void	pad_write(const char *str, int width)
+static void	pad_write(const char *s, int w, const char *cc)
 {
 	int	len;
 	int	i;
 
-	len = ft_strlen(str);
-	ft_dprintf(1, "%s", str);
+	len = ft_strlen(s);
+	if (cc)
+		ft_dprintf(1, "%s%s\033[0m", cc, s);
+	else
+		ft_dprintf(1, "%s", s);
 	i = len;
-	while (i < width)
+	while (i < w)
 	{
-		write(1, " ", 1);
+		buf_write(1, " ", 1);
 		i++;
 	}
 }
@@ -53,8 +56,8 @@ static int	try_layout(char **names, int count, int nrows, int *cw, int tw)
 		while (++r < nrows)
 		{
 			idx = c * nrows + r;
-			if (idx < count && ft_strlen(names[idx]) > cw[c])
-				cw[c] = ft_strlen(names[idx]);
+			if (idx < count && (int)ft_strlen(names[idx]) > cw[c])
+				cw[c] = (int)ft_strlen(names[idx]);
 		}
 	}
 	total = 0;
@@ -69,50 +72,72 @@ static int	try_layout(char **names, int count, int nrows, int *cw, int tw)
 	return (total <= tw);
 }
 
-void	print_columns(char **names, int count)
+static void	print_col_pipe(char **nm, int cnt, struct stat *st, int col)
 {
-	int	term_w;
-	int	nrows;
-	int	ncols;
-	int	*col_w;
-	int	r;
-	int	c;
+	int	i;
+
+	i = -1;
+	while (++i < cnt)
+	{
+		if (!nm[i])
+			continue ;
+		if (col && st)
+			print_color_name(nm[i], &st[i], col);
+		else
+			ft_dprintf(1, "%s", nm[i]);
+		buf_write(1, "\n", 1);
+	}
+}
+
+static void	print_col_row(char **nm, struct stat *st, int *p, const char *cc)
+{
 	int	idx;
 
-	if (count <= 0)
+	idx = p[0];
+	if (st && p[3])
+		cc = get_color_code(&st[idx]);
+	if (p[2])
+	{
+		if (cc)
+			ft_dprintf(1, "%s%s\033[0m", cc, nm[idx]);
+		else
+			ft_dprintf(1, "%s", nm[idx]);
+	}
+	else
+		pad_write(nm[idx], p[1] + 2, cc);
+}
+
+void	print_columns(char **nm, int cnt, struct stat *st, int col)
+{
+	int	v[5];
+	int	*cw;
+
+	if (cnt <= 0)
 		return ;
 	if (!isatty(1))
-	{
-		r = -1;
-		while (++r < count)
-			if (names[r])
-				ft_dprintf(1, "%s\n", names[r]);
+		return (print_col_pipe(nm, cnt, st, col));
+	v[0] = get_term_width();
+	cw = malloc(sizeof(int) * (cnt + 1));
+	if (!cw)
 		return ;
-	}
-	term_w = get_term_width();
-	col_w = malloc(sizeof(int) * (count + 1));
-	if (!col_w)
-		return ;
-	nrows = 0;
-	while (++nrows <= count)
-		if (try_layout(names, count, nrows, col_w, term_w))
+	v[1] = 0;
+	while (++v[1] <= cnt)
+		if (try_layout(nm, cnt, v[1], cw, v[0]))
 			break ;
-	ncols = (count + nrows - 1) / nrows;
-	r = -1;
-	while (++r < nrows)
+	v[2] = (cnt + v[1] - 1) / v[1];
+	v[3] = -1;
+	while (++v[3] < v[1])
 	{
-		c = -1;
-		while (++c < ncols)
+		v[4] = -1;
+		while (++v[4] < v[2])
 		{
-			idx = c * nrows + r;
-			if (idx >= count || !names[idx])
+			v[0] = v[4] * v[1] + v[3];
+			if (v[0] >= cnt || !nm[v[0]])
 				break ;
-			if (c == ncols - 1 || (c + 1) * nrows + r >= count)
-				ft_dprintf(1, "%s", names[idx]);
-			else
-				pad_write(names[idx], col_w[c] + 2);
+			print_col_row(nm, st, (int [4]){v[0], cw[v[4]], (v[4] == v[2] - 1
+				|| (v[4] + 1) * v[1] + v[3] >= cnt), col}, NULL);
 		}
-		write(1, "\n", 1);
+		buf_write(1, "\n", 1);
 	}
-	free(col_w);
+	free(cw);
 }

@@ -22,11 +22,11 @@ int	ft_dprintf(int fd, const char *format, ...)
 	while (*(format) != '\0')
 	{
 		if (*format == '%' && *(format + 1) == '%')
-			count += write (fd, format++, 1);
+			count += buf_write(fd, format++, 1);
 		else if (*format == '%')
 			count += print_format (fd, *(++format), ap);
 		else
-			count += write (fd, format, 1);
+			count += buf_write(fd, format, 1);
 		format++;
 	}
 	va_end (ap);

@@ -21,9 +21,11 @@ void	put_message_help(char *str)
 	ft_dprintf(1, "  -d\t\tlist directories themselves, not their contents\n");
 	ft_dprintf(1, "  -f\t\tdo not sort, enable -aU, disable -ls --color\n");
 	ft_dprintf(1, "  -g\t\tlike -l, but do not list owner\n");
+	ft_dprintf(1, "  -h\t\tprint sizes in human readable format\n");
 	ft_dprintf(1, "  -l\t\tuse a long listing format\n");
 	ft_dprintf(1, "  -R\t\tlist subdirectories recursively\n");
 	ft_dprintf(1, "  -r\t\treverse order while sorting\n");
+	ft_dprintf(1, "  -s\t\tprint size of each file in blocks\n");
 	ft_dprintf(1, "  -t\t\tsort by time\n");
 	ft_dprintf(1, "  -U\t\tdo not sort; list entries in directory order\n");
 	ft_dprintf(1, "  --help\tdisplay this help and exit\n", 1);
@@ -32,6 +34,7 @@ void	put_message_help(char *str)
 	ft_dprintf(1, "  0  if OK,\n");
 	ft_dprintf(1, "  1  if minor problems (e.g., cannot access subdirectory),\n");
 	ft_dprintf(1, "  2  if serious trouble (e.g., cannot access command-line argument).\n");
+	buf_flush(1);
 }
 
 void	init_flags(t_flags *flags)
@@ -44,6 +47,8 @@ void	init_flags(t_flags *flags)
 	flags->time_sort = 0;
 	flags->color = 0;
 	flags->all = 0;
+	flags->size = 0;
+	flags->human_readable = 0;
 	flags->file_count = 0;
 	flags->error_code = 0;
 	flags->last_code = 0;
@@ -81,6 +86,10 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 	}
 	else if (av[i][j] == 'U')
 		flags->not_sorted = 1;
+	else if (av[i][j] == 's')
+		flags->size = 1;
+	else if (av[i][j] == 'h')
+		flags->human_readable = 1;
 	else
 	{
 		ft_dprintf(2, "%s: illegal option -- '%c'\n", av[0], av[i][j]);
@@ -128,6 +137,7 @@ void	exit_help(int code, t_flags *flags, int count)
 	}
 	free(flags->files);
 	free(flags);
+	buf_flush(1);
 	if (code == 1)
 		exit(1);
 	else if (code == 2)

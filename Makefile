@@ -12,7 +12,7 @@ BOLD		=	$(shell tput bold)
 RESET		=	$(shell tput -Txterm sgr0)
 
 CC			=	cc
-CFLAGS		=	-g -Wall -Werror -Wextra -O3
+CFLAGS		=	-g -O3
 
 include Files.mk
 
@@ -32,9 +32,11 @@ all: fclean $(NAME)
 
 $(NAME): $(OBJS)
 	@make --no-print-directory -s -C ft_dprintf
+	@echo "$(BOLD)$(RED)Libft compiled$(RESET)"
+	@make --no-print-directory -s -C libft
 	@echo "$(BOLD)$(RED)Ft_dprintf compiled$(RESET)"
 	@if [ -f ./$(NAME) ]; then echo "$(BOLD)$(BLUE)Executable already exists.$(RESET)"; else echo "$(BOLD)$(BLUE)Created the executable : $(NAME)$(RESET)"; fi
-	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) ft_dprintf/dprintf.a -lacl
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) ft_dprintf/dprintf.a libft/libft.a -lacl
 	@echo "$(BOLD)$(PURPLE)Finished the compilation of the Makefile$(RESET)"
 	@$(eval NUMB3=$(shell echo $$(($(NUMB3)+1))))
 
@@ -49,6 +51,8 @@ $(OBJ_DIR)/%.o: %.c
 clean:
 	@make --no-print-directory -s clean -C ft_dprintf
 	@echo "$(BOLD)$(BLUE)Finished cleaning ft_dprintf$(RESET)"
+	@make --no-print-directory -s clean -C libft
+	@echo "$(BOLD)$(BLUE)Finished cleaning libft$(RESET)"
 	@if [ $(shell find -name "*.o" | wc -l) -gt 0 ]; then echo "$(BOLD)$(RED)Removed all objs$(RESET)"; else echo "$(BOLD)$(PURPLE)All objs were already removed.$(RESET)"; fi
 	@rm -rf $(OBJ_DIR)
 	@echo "$(BOLD)$(BLUE)Finished cleaning all$(RESET)"
@@ -56,6 +60,8 @@ clean:
 fclean: clean
 	@make --no-print-directory -s fclean -C ft_dprintf
 	@echo "$(BOLD)$(BLUE)Finished fcleaning ft_dprintf$(RESET)"
+	@make --no-print-directory -s fclean -C libft
+	@echo "$(BOLD)$(BLUE)Finished fcleaning libft$(RESET)"
 	@if [ -f ./$(NAME) ]; then echo "$(BOLD)$(RED)Removed the executable : $(NAME).$(RESET)"; else echo "$(BOLD)$(PURPLE)The executable $(NAME) was already removed.$(RESET)"; fi
 	@rm -f $(NAME)
 	@echo "$(BOLD)$(LIGHTBLUE)Finished fcleaning all$(RESET)"

@@ -23,19 +23,19 @@ void	do_other_flag(t_flags *flags, int i)
 	if (flags->long_format)
 	{
 		cw = (t_colwidths){0, 0, 0, 0};
-		getperms(st, flags->files[i], flags->group, cw);
-		ft_dprintf(1, "%s", flags->files[i]);
+		getperms(st, flags->files[i], flags, cw);
+		print_color_name(flags->files[i], &st, flags->color);
 		if (S_ISLNK(st.st_mode))
-			getsymlink(st, flags->files[i]);
-		write(1, "\n", 1);
+			getsymlink(st, flags->files[i], flags->color);
+		buf_write(1, "\n", 1);
 	}
 	else
 	{
-		ft_dprintf(1, "%s", flags->files[i]);
+		print_color_name(flags->files[i], &st, flags->color);
 		if (!isatty(1))
-			write(1, "\n", 1);
+			buf_write(1, "\n", 1);
 		else
-			write(1, "  ", 2);
+			buf_write(1, "  ", 2);
 	}
 }
 
@@ -69,10 +69,11 @@ void	do_recursive_flag(t_flags *flags)
 
 void	do_flags(t_flags *flags)
 {
-	int		i;
-	char	**non_dirs;
-	int		non_dir_count;
-	int		first;
+	int			i;
+	char		**non_dirs;
+	struct stat	*nd_st;
+	int			non_dir_count;
+	int			first;
 
 	i = -1;
 	if (flags->directory)
@@ -87,7 +88,7 @@ void	do_flags(t_flags *flags)
 				continue ;
 		}
 		if (!flags->long_format && isatty(1))
-			write(1, "\n", 1);
+			buf_write(1, "\n", 1);
 		return ;
 	}
 	if (flags->recursive && flags->file_count >= 1)
@@ -95,7 +96,8 @@ void	do_flags(t_flags *flags)
 	else
 	{
 		non_dirs = malloc(sizeof(char *) * (flags->file_count + 1));
-		if (!non_dirs)
+		nd_st = malloc(sizeof(struct stat) * (flags->file_count + 1));
+		if (!non_dirs || !nd_st)
 			return ;
 		non_dir_count = 0;
 		first = 1;
@@ -104,6 +106,7 @@ void	do_flags(t_flags *flags)
 		{
 			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
 			{
+				lstat(flags->files[i], &nd_st[non_dir_count]);
 				non_dirs[non_dir_count++] = flags->files[i];
 				continue ;
 			}
@@ -111,7 +114,7 @@ void	do_flags(t_flags *flags)
 		if (non_dir_count > 0)
 		{
 			non_dirs[non_dir_count] = NULL;
-			print_columns(non_dirs, non_dir_count);
+			print_columns(non_dirs, non_dir_count, nd_st, flags->color);
 			first = 0;
 		}
 		i = -1;
@@ -125,6 +128,7 @@ void	do_flags(t_flags *flags)
 			first = 0;
 		}
 		free(non_dirs);
+		free(nd_st);
 	}
 }
 
@@ -173,6 +177,7 @@ int	main(int ac, char **av)
 	else
 		quicksort_files(flags->files, 0, flags->file_count - 1);
 	do_flags(flags);
+	buf_flush(1);
 	i = -1;
 	while (flags->files[++i])
 		free(flags->files[i]);
