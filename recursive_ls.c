@@ -14,8 +14,28 @@
 
 void	print_file_loop(t_files files, t_flags *flags, int *count)
 {
-	int	i;
+	int			i;
+	char		**names;
+	int			n;
+	t_colwidths	cw;
 
+	n = 0;
+	i = -1;
+	while (files.files[++i])
+	{
+		if (!files.files[i] || !files.real_paths[i])
+			continue ;
+		if (strncmp(files.files[i], ".", 1) == 0 && !flags->all)
+			continue ;
+		n++;
+	}
+	names = malloc(sizeof(char *) * (n + 1));
+	if (!names)
+		return ;
+	cw = (t_colwidths){0, 0, 0, 0};
+	if (flags->long_format)
+		cw = init_colwidths(&files, flags->group, flags->all);
+	n = 0;
 	i = -1;
 	while (files.files[++i])
 	{
@@ -25,16 +45,23 @@ void	print_file_loop(t_files files, t_flags *flags, int *count)
 			continue ;
 		if (flags->long_format)
 		{
-			getperms(files.stats[i]);
+			getperms(files.stats[i], files.real_paths[i], flags->group, cw);
 			ft_dprintf(1, "%s", files.files[i]);
 			if (S_ISLNK(files.stats[i].st_mode))
 				getsymlink(files.stats[i], files.real_paths[i]);
 			write(1, "\n", 1);
 		}
 		else
-			ft_dprintf(1, "%s  ", files.files[i]);
-		(*count)++;
+			names[n] = files.files[i];
+		n++;
 	}
+	if (!flags->long_format)
+	{
+		names[n] = NULL;
+		print_columns(names, n);
+	}
+	*count = n;
+	free(names);
 }
 
 static void	free_files(t_files *files)
@@ -63,7 +90,7 @@ int	opendir_and_print(const char *base_path, t_flags *flags, t_files *files)
 		ft_dprintf(1, "%s:\n", base_path);
 	malloc_and_put_files(files, dir, flags, base_path);
 	if (flags->long_format)
-		ft_dprintf(1, "Total %u\n", getblocksize(files));
+		ft_dprintf(1, "total %u\n", getblocksize(files));
 	closedir(dir);
 	return (1);
 }
@@ -91,8 +118,6 @@ void	recursive_ls(const char *base_path, t_flags *flags)
 		return ;
 	printed_count = 0;
 	print_file_loop(files, flags, &printed_count);
-	if (printed_count >= 1 && !flags->long_format && !flags->last_code)
-		ft_dprintf(1, "\n");
 	i = -1;
 	while (files.files[++i])
 	{

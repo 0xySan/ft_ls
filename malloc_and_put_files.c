@@ -12,55 +12,82 @@
 
 #include "ft_ls.h"
 
-static int	count_entries(DIR *d, t_flags *f)
+typedef struct s_dnode
+{
+	char			*name;
+	struct s_dnode	*next;
+}	t_dnode;
+
+static t_dnode	*collect_entries(DIR *d, t_flags *f, int *count)
 {
 	struct dirent	*e;
-	int				c;
+	t_dnode			*head;
+	t_dnode			*node;
 
-	c = 0;
-	e = readdir(d);
-	while (e)
-	{
-		if (!(e->d_name[0] == '.' && !f->all))
-			c++;
-		e = readdir(d);
-	}
-	rewinddir(d);
-	return (c);
-}
-
-static int	fill_entries(t_files *t, DIR *d, t_flags *f, const char *bp)
-{
-	struct dirent	*e;
-	int				i;
-
-	i = 0;
+	head = NULL;
+	*count = 0;
 	e = readdir(d);
 	while (e)
 	{
 		if (!(e->d_name[0] == '.' && !f->all))
 		{
-			t->files[i] = strdup(e->d_name);
-			t->real_paths[i] = get_real_path(bp, e->d_name);
-			if (!t->files[i] || !t->real_paths[i])
-			{
-				if (t->files[i])
-					free(t->files[i]);
-				if (t->real_paths[i])
-					free(t->real_paths[i]);
-				e = readdir(d);
-				continue;
-			}
-			if (lstat(t->real_paths[i], &t->stats[i]) == -1)
-			{
-				free(t->files[i]);
-				free(t->real_paths[i]);
-				e = readdir(d);
-				continue;
-			}
-			i++;
+			node = malloc(sizeof(t_dnode));
+			if (!node)
+				exit(EXIT_FAILURE);
+			node->name = ft_strdup(e->d_name);
+			node->next = head;
+			head = node;
+			(*count)++;
 		}
 		e = readdir(d);
+	}
+	return (head);
+}
+
+static void	free_list(t_dnode *lst)
+{
+	t_dnode	*tmp;
+
+	while (lst)
+	{
+		tmp = lst->next;
+		free(lst->name);
+		free(lst);
+		lst = tmp;
+	}
+}
+
+static int	fill_from_list(t_files *t, t_dnode *lst,
+	t_flags *f, const char *bp)
+{
+	int	i;
+
+	i = 0;
+	while (lst)
+	{
+		t->files[i] = lst->name;
+		lst->name = NULL;
+		t->real_paths[i] = get_real_path(bp, t->files[i]);
+		if (!t->files[i] || !t->real_paths[i])
+		{
+			free(t->files[i]);
+			free(t->real_paths[i]);
+			lst = lst->next;
+			continue ;
+		}
+		if (lstat(t->real_paths[i], &t->stats[i]) == -1)
+		{
+			ft_dprintf(2,
+				"./ft_ls: cannot access '%s': No such file or directory\n",
+				t->real_paths[i]);
+			f->error_code = 1;
+			free(t->files[i]);
+			free(t->real_paths[i]);
+			lst = lst->next;
+			continue ;
+		}
+		i++;
+		lst = lst->next;
 	}
 	t->files[i] = NULL;
 	t->real_paths[i] = NULL;
@@ -84,16 +111,19 @@ static void	reverse_entries(t_files *t, int n)
 void	malloc_and_put_files(t_files *t, DIR *d,
 	t_flags *f, const char *bp)
 {
-	int	n;
-	int	actual_count;
+	int		n;
+	int		actual_count;
+	t_dnode	*lst;
 
-	n = count_entries(d, f);
+	lst = collect_entries(d, f, &n);
 	t->files = malloc((n + 1) * sizeof(char *));
 	t->real_paths = malloc((n + 1) * sizeof(char *));
-	t->stats = malloc(n * sizeof(struct stat));
+	t->stats = malloc((n + 1) * sizeof(struct stat));
 	if (!t->files || !t->real_paths || !t->stats)
 		exit(EXIT_FAILURE);
-	actual_count = fill_entries(t, d, f, bp);
+	t->file_count = n;
+	actual_count = fill_from_list(t, lst, f, bp);
+	free_list(lst);
 	if (f->time_sort)
 		timesort(t, 0, actual_count - 1);
 	else

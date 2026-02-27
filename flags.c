@@ -18,17 +18,21 @@ void	put_message_help(char *str)
 	ft_dprintf(1, "Usage: %s [OPTION]... [FILE]...\n", str);
 	ft_dprintf(1, "Options:\n");
 	ft_dprintf(1, "  -a\t\tdo not ignore entries starting with .\n");
+	ft_dprintf(1, "  -d\t\tlist directories themselves, not their contents\n");
+	ft_dprintf(1, "  -g\t\tlike -l, but do not list owner\n");
 	ft_dprintf(1, "  -l\t\tuse a long listing format\n");
 	ft_dprintf(1, "  -R\t\tlist subdirectories recursively\n");
 	ft_dprintf(1, "  -r\t\treverse order while sorting\n");
 	ft_dprintf(1, "  -t\t\tsort by time\n");
-	ft_dprintf(1, "  --help\tshow this help message\n", 1);
+	ft_dprintf(1, "  --help\tdisplay this help and exit\n", 1);
 }
 
 void	init_flags(t_flags *flags)
 {
 	flags->recursive = 0;
 	flags->long_format = 0;
+	flags->group = 0;
+	flags->directory = 0;
 	flags->reverse = 0;
 	flags->time_sort = 0;
 	flags->all = 0;
@@ -51,6 +55,13 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 		flags->reverse = 1;
 	else if (av[i][j] == 't')
 		flags->time_sort = 1;
+	else if (av[i][j] == 'g')
+	{
+		flags->long_format = 1;
+		flags->group = 1;
+	}
+	else if (av[i][j] == 'd')
+		flags->directory = 1;
 	else
 	{
 		ft_dprintf(2, "%s: illegal option -- '%c'\n", av[0], av[i][j]);

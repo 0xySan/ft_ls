@@ -25,12 +25,18 @@
 # include <grp.h>
 # include <pwd.h>
 # include <time.h>
+# include <sys/acl.h>
+# include <acl/libacl.h>
+# include <sys/xattr.h>
+# include <sys/ioctl.h>
 # include "ft_dprintf/ft_dprintf.h"
 
 typedef struct s_flags
 {
 	int		recursive;
 	int		long_format;
+	int		group;
+	int 	directory;
 	int		reverse;
 	int		time_sort;
 	int		all;
@@ -58,6 +64,14 @@ typedef struct s_uid_gid_cache
 	const char	*gr_name;
 }	t_cache;
 
+typedef struct s_colwidths
+{
+	int		nlink_w;
+	int		owner_w;
+	int		group_w;
+	int		size_w;
+}	t_colwidths;
+
 void	quicksort(t_files *files, int low, int high);
 int		is_directory(const char *path);
 int		is_executable_file(const char *path);
@@ -66,8 +80,9 @@ char	*get_real_path(const char *base_path, const char *path);
 void	swap(char **a, char **b);
 void	timesort(t_files *files, int low, int high);
 size_t	getblocksize(t_files *files);
-void	getperms(struct stat st);
+void	getperms(struct stat st, const char *path, int group, t_colwidths cw);
 void	swap_stat(struct stat *a, struct stat *b);
+void	print_columns(char **names, int count);
 void	getsymlink(struct stat st, char *path);
 char	*ft_strdup(const char *s1);
 int		ft_strlen(const char *str);
@@ -87,5 +102,9 @@ void	put_message_help(char *str);
 void	timesort_files(char **files, int low, int high);
 void	quicksort_files(char **files, int low, int high);
 int		str_lower_cmp(const char *a, const char *b);
+int		count_digits(unsigned long n);
+void	print_padded_num(unsigned long n, int width);
+void	print_padded_str(const char *s, int width);
+t_colwidths	init_colwidths(t_files *files, int group, int all);
 
 #endif

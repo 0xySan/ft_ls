@@ -66,3 +66,46 @@ int	count_files(char **av)
 	}
 	return (count);
 }
+
+int	count_digits(unsigned long n)
+{
+	int	count;
+
+	count = 1;
+	while (n >= 10)
+	{
+		n /= 10;
+		count++;
+	}
+	return (count);
+}
+
+void	print_padded_num(unsigned long n, int width)
+{
+	int	digits;
+	int	i;
+
+	digits = count_digits(n);
+	i = digits;
+	while (i < width)
+	{
+		write(1, " ", 1);
+		i++;
+	}
+	ft_putunit_max(1, n, 10);
+}
+
+void	print_padded_str(const char *s, int width)
+{
+	int	len;
+	int	i;
+
+	len = ft_strlen(s);
+	ft_dprintf(1, "%s", s);
+	i = len;
+	while (i < width)
+	{
+		write(1, " ", 1);
+		i++;
+	}
+}

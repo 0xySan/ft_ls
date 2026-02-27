@@ -26,14 +26,15 @@ NUMB3		=	0
 NUMB4		=	0
 PERCENT		=	0
 
-all: $(NAME)
+all: fclean $(NAME)
 	@if [ $(shell echo $(NUMB3)) -eq 0 ]; then echo "$(BOLD)$(RED)Nothing to be made.$(RESET)"; fi
+	@echo "$(BOLD)$(RED)!!! FCLEAN IN ALL REMOVE ONCE FINISHED !!!$(RESET)"
 
 $(NAME): $(OBJS)
 	@make --no-print-directory -s -C ft_dprintf
 	@echo "$(BOLD)$(RED)Ft_dprintf compiled$(RESET)"
 	@if [ -f ./$(NAME) ]; then echo "$(BOLD)$(BLUE)Executable already exists.$(RESET)"; else echo "$(BOLD)$(BLUE)Created the executable : $(NAME)$(RESET)"; fi
-	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) ft_dprintf/dprintf.a
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) ft_dprintf/dprintf.a -lacl
 	@echo "$(BOLD)$(PURPLE)Finished the compilation of the Makefile$(RESET)"
 	@$(eval NUMB3=$(shell echo $$(($(NUMB3)+1))))
 
@@ -41,7 +42,7 @@ $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(eval NUMB2=$(shell echo $$(($(NUMB2)+1))))
 	$(eval PERCENT=$(shell awk "BEGIN { printf(\"%.1f\", $(NUMB2) * 100 / $(NB)) }"))
-	@$(CC) -c $< -o $@ -g -Wall -Werror -Wextra
+	@$(CC) $(CFLAGS) -c $< -o $@
 	@$(eval NUMB4=$(shell echo $@ / | tr -cd '/' | wc -c))
 	@if [ $(shell uname -a | grep arch | wc -l) -gt 0 ] || [ $(shell cat /etc/*-release | grep fedora | wc -l) -gt 0 ]; then echo -e "$(BOLD)$(PURPLE)[Percent : "$(PERCENT)%"] $(BOLD)$(GREEN) \t~Compiling $(shell echo $< | cut -d'/' -f 2) : $(shell echo $@ | cut -d'/' -f $(NUMB4))$(RESET)"; else echo "$(BOLD)$(PURPLE)[Percent : "$(PERCENT)%"] $(BOLD)$(GREEN) \t~Compiling $(shell echo $< | cut -d'/' -f 2) : $(shell echo $@ | cut -d'/' -f $(NUMB4))$(RESET)"; fi
 

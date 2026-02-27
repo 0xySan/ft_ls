@@ -9,4 +9,5 @@ FILES		=	main \
 				flags \
 				time_sort_files \
 				quick_sort_files \
-				malloc_and_put_files
+				malloc_and_put_files \
+				column_print

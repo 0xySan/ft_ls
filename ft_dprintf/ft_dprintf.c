@@ -24,7 +24,7 @@ int	ft_dprintf(int fd, const char *format, ...)
 		if (*format == '%' && *(format + 1) == '%')
 			count += write (fd, format++, 1);
 		else if (*format == '%')
-			count += print_format (*(++format), ap);
+			count += print_format (fd, *(++format), ap);
 		else
 			count += write (fd, format, 1);
 		format++;

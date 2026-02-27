@@ -12,7 +12,7 @@
 
 #include "ft_dprintf.h"
 
-int	ft_putunit_max(unsigned long num, int base)
+int	ft_putunit_max(int fd, unsigned long num, int base)
 {
 	char	*digits;
 	char	buffer[50];
@@ -32,14 +32,14 @@ int	ft_putunit_max(unsigned long num, int base)
 	}
 	while (buffer[i])
 	{
-		write(1, &buffer[i], 1);
+		write(fd, &buffer[i], 1);
 		count++;
 		i++;
 	}
 	return (count);
 }
 
-int	ft_putpointer(void *pointer)
+int	ft_putpointer(int fd, void *pointer)
 {
 	unsigned long long	address;
 	int					count;
@@ -47,8 +47,8 @@ int	ft_putpointer(void *pointer)
 	count = 0;
 	address = (unsigned long long) pointer;
 	if (pointer == NULL)
-		return (ft_putstring("(nil)"));
-	count += ft_putstring("0x");
-	count += ft_putunit_max(address, 16);
+		return (ft_putstring(fd, "(nil)"));
+	count += ft_putstring(fd, "0x");
+	count += ft_putunit_max(fd, address, 16);
 	return (count);
 }

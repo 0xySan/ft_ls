@@ -15,19 +15,28 @@
 
 void	do_other_flag(t_flags *flags, int i)
 {
-	struct stat	st;
+	struct stat		st;
+	t_colwidths		cw;
 
 	if (lstat(flags->files[i], &st) != 0)
 		return ;
 	if (flags->long_format)
 	{
-		getperms(st);
+		cw = (t_colwidths){0, 0, 0, 0};
+		getperms(st, flags->files[i], flags->group, cw);
 		ft_dprintf(1, "%s", flags->files[i]);
 		if (S_ISLNK(st.st_mode))
 			getsymlink(st, flags->files[i]);
+		write(1, "\n", 1);
 	}
 	else
-		ft_dprintf(1, "%s  ", flags->files[i]);
+	{
+		ft_dprintf(1, "%s", flags->files[i]);
+		if (!isatty(1))
+			write(1, "\n", 1);
+		else
+			write(1, "  ", 2);
+	}
 }
 
 void	do_recursive_flag(t_flags *flags)
@@ -65,6 +74,21 @@ void	do_flags(t_flags *flags)
 
 	i = -1;
 	count = 0;
+	if (flags->directory)
+	{
+		i = -1;
+		while (flags->files[++i])
+		{
+			do_other_flag(flags, i);
+			if (!flags->long_format && isatty(1))
+				continue ;
+			if (!isatty(1) || flags->long_format)
+				continue ;
+		}
+		if (!flags->long_format && isatty(1))
+			write(1, "\n", 1);
+		return ;
+	}
 	if (flags->recursive && flags->file_count >= 1)
 		do_recursive_flag(flags);
 	else

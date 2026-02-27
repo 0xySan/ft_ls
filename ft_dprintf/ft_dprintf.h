@@ -17,12 +17,12 @@
 # include <unistd.h>
 
 int	ft_dprintf(int fd, const char *format, ...);
-int	ft_putchar(int c);
-int	ft_putnumber(long n, int base);
-int	ft_putnumber_caps(long n, int base);
-int	print_format(char specifier, va_list ap);
-int	ft_putunit_max(unsigned long num, int base);
-int	ft_putpointer(void *pointer);
-int	ft_putstring(char *str);
+int	ft_putchar(int fd, int c);
+int	ft_putnumber(int fd, long n, int base);
+int	ft_putnumber_caps(int fd, long n, int base);
+int	print_format(int fd, char specifier, va_list ap);
+int	ft_putunit_max(int fd, unsigned long num, int base);
+int	ft_putpointer(int fd, void *pointer);
+int	ft_putstring(int fd, char *str);
 
 #endif
