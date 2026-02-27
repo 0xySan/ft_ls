@@ -29,7 +29,7 @@ static int	count_entries(DIR *d, t_flags *f)
 	return (c);
 }
 
-static void	fill_entries(t_files *t, DIR *d, t_flags *f, const char *bp)
+static int	fill_entries(t_files *t, DIR *d, t_flags *f, const char *bp)
 {
 	struct dirent	*e;
 	int				i;
@@ -42,14 +42,29 @@ static void	fill_entries(t_files *t, DIR *d, t_flags *f, const char *bp)
 		{
 			t->files[i] = strdup(e->d_name);
 			t->real_paths[i] = get_real_path(bp, e->d_name);
+			if (!t->files[i] || !t->real_paths[i])
+			{
+				if (t->files[i])
+					free(t->files[i]);
+				if (t->real_paths[i])
+					free(t->real_paths[i]);
+				e = readdir(d);
+				continue;
+			}
 			if (lstat(t->real_paths[i], &t->stats[i]) == -1)
-				perror(t->real_paths[i]);
+			{
+				free(t->files[i]);
+				free(t->real_paths[i]);
+				e = readdir(d);
+				continue;
+			}
 			i++;
 		}
 		e = readdir(d);
 	}
 	t->files[i] = NULL;
 	t->real_paths[i] = NULL;
+	return (i);
 }
 
 static void	reverse_entries(t_files *t, int n)
@@ -70,6 +85,7 @@ void	malloc_and_put_files(t_files *t, DIR *d,
 	t_flags *f, const char *bp)
 {
 	int	n;
+	int	actual_count;
 
 	n = count_entries(d, f);
 	t->files = malloc((n + 1) * sizeof(char *));
@@ -77,11 +93,11 @@ void	malloc_and_put_files(t_files *t, DIR *d,
 	t->stats = malloc(n * sizeof(struct stat));
 	if (!t->files || !t->real_paths || !t->stats)
 		exit(EXIT_FAILURE);
-	fill_entries(t, d, f, bp);
+	actual_count = fill_entries(t, d, f, bp);
 	if (f->time_sort)
-		timesort(t, 0, n - 1);
+		timesort(t, 0, actual_count - 1);
 	else
-		quicksort(t, 0, n - 1);
+		quicksort(t, 0, actual_count - 1);
 	if (f->reverse)
-		reverse_entries(t, n);
+		reverse_entries(t, actual_count);
 }

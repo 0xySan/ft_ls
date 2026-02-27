@@ -19,6 +19,8 @@ void	print_file_loop(t_files files, t_flags *flags, int *count)
 	i = -1;
 	while (files.files[++i])
 	{
+		if (!files.files[i] || !files.real_paths[i])
+			continue ;
 		if (strncmp(files.files[i], ".", 1) == 0 && !flags->all)
 			continue ;
 		if (flags->long_format)
@@ -68,6 +70,8 @@ int	opendir_and_print(const char *base_path, t_flags *flags, t_files *files)
 
 void	check_recursion(t_files files, t_flags *flags, int i, int printed_count)
 {
+	if (!files.real_paths[i])
+		return ;
 	if (is_directory(files.real_paths[i]) && !S_ISLNK(files.stats[i].st_mode))
 	{
 		if (flags->recursive && printed_count >= 1 && !flags->last_code)
@@ -92,6 +96,8 @@ void	recursive_ls(const char *base_path, t_flags *flags)
 	i = -1;
 	while (files.files[++i])
 	{
+		if (!files.files[i] || !files.real_paths[i])
+			continue ;
 		if (strcmp(files.files[i], ".") == 0
 			|| strcmp(files.files[i], "..") == 0)
 		{

@@ -35,6 +35,8 @@ char	*get_real_path(const char *base_path, const char *path)
 	char	*real_path;
 
 	real_path = malloc(sizeof(char) * (strlen(base_path) + strlen(path) + 2));
+	if (!real_path)
+		return (NULL);
 	strcpy(real_path, base_path);
 	if (real_path[strlen(real_path) - 1] != '/')
 		strcat(real_path, "/");
