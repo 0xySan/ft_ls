@@ -39,6 +39,8 @@ typedef struct s_flags
 	int 	directory;
 	int		reverse;
 	int		time_sort;
+	int		not_sorted;
+	int		color;
 	int		all;
 	char	**files;
 	int		file_count;

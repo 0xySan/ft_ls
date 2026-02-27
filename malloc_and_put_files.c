@@ -124,10 +124,12 @@ void	malloc_and_put_files(t_files *t, DIR *d,
 	t->file_count = n;
 	actual_count = fill_from_list(t, lst, f, bp);
 	free_list(lst);
-	if (f->time_sort)
+	if (f->not_sorted)
+		reverse_entries(t, actual_count);
+	else if (f->time_sort)
 		timesort(t, 0, actual_count - 1);
 	else
 		quicksort(t, 0, actual_count - 1);
-	if (f->reverse)
+	if (f->reverse && !f->not_sorted)
 		reverse_entries(t, actual_count);
 }

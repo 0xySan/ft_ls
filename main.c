@@ -69,11 +69,12 @@ void	do_recursive_flag(t_flags *flags)
 
 void	do_flags(t_flags *flags)
 {
-	int	i;
-	int	count;
+	int		i;
+	char	**non_dirs;
+	int		non_dir_count;
+	int		first;
 
 	i = -1;
-	count = 0;
 	if (flags->directory)
 	{
 		i = -1;
@@ -93,16 +94,37 @@ void	do_flags(t_flags *flags)
 		do_recursive_flag(flags);
 	else
 	{
+		non_dirs = malloc(sizeof(char *) * (flags->file_count + 1));
+		if (!non_dirs)
+			return ;
+		non_dir_count = 0;
+		first = 1;
+		i = -1;
+		while (flags->files[++i])
+		{
+			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
+			{
+				non_dirs[non_dir_count++] = flags->files[i];
+				continue ;
+			}
+		}
+		if (non_dir_count > 0)
+		{
+			non_dirs[non_dir_count] = NULL;
+			print_columns(non_dirs, non_dir_count);
+			first = 0;
+		}
 		i = -1;
 		while (flags->files[++i])
 		{
 			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
 				continue ;
-			if (count >= 1)
+			if (!first)
 				ft_dprintf(1, "\n");
 			recursive_ls(flags->files[i], flags);
-			count++;
+			first = 0;
 		}
+		free(non_dirs);
 	}
 }
 
