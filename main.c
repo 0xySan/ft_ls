@@ -12,6 +12,7 @@
 
 #include "ft_dprintf/ft_dprintf.h"
 #include "ft_ls.h"
+#include <string.h>
 
 void	do_other_flag(t_flags *flags, int i)
 {
@@ -106,7 +107,8 @@ void	do_flags(t_flags *flags)
 		{
 			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
 			{
-				lstat(flags->files[i], &nd_st[non_dir_count]);
+				if (lstat(flags->files[i], &nd_st[non_dir_count]) != 0)
+					continue ;
 				non_dirs[non_dir_count++] = flags->files[i];
 				continue ;
 			}
@@ -114,7 +116,18 @@ void	do_flags(t_flags *flags)
 		if (non_dir_count > 0)
 		{
 			non_dirs[non_dir_count] = NULL;
-			print_columns(non_dirs, non_dir_count, nd_st, flags->color);
+			if (flags->long_format)
+			{
+				i = -1;
+				while (flags->files[++i])
+				{
+					if (!is_directory(flags->files[i])
+						|| is_symlink(flags->files[i]))
+						do_other_flag(flags, i);
+				}
+			}
+			else
+				print_columns(non_dirs, non_dir_count, nd_st, flags->color, flags->width);
 			first = 0;
 		}
 		i = -1;
@@ -140,7 +153,21 @@ void	main_loop(int ac, char **av, t_flags *flags)
 	while (i < ac)
 	{
 		if (av[i][0] == '-')
-			exit_help(check_flags_loop(av, flags, i), flags, flags->file_count);
+		{
+			if (strcmp(av[i], "--width") == 0)
+			{
+				if (i + 1 >= ac || !av[i + 1][0] || av[i + 1][0] == '-')
+				{
+					ft_dprintf(2, "%s: option requires an argument -- 'width'\n", av[0]);
+					ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
+					exit_help(1, flags, flags->file_count);
+				}
+				flags->width = ft_atoi(av[i + 1]);
+				i++;
+			}
+			else
+				exit_help(check_flags_loop(av, flags, i), flags, flags->file_count);
+		}
 		else
 		{
 			if (file_exists(av[i]) == false)

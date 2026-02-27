@@ -137,3 +137,122 @@ void	print_color_name(const char *name, struct stat *st, int color)
 	else
 		buf_write(1, name, ft_strlen(name));
 }
+
+char *get_size_human_readable(off_t size, double size_unit)
+{
+	const char	*units[] = {"", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+	int			i;
+	static char	buf[32];
+	int			len;
+	double		fraction;
+	int			whole;
+	int			decimal;
+
+	i = 0;
+	if (size == 0)
+	{
+		ft_strcpy(buf, "0");
+		return (buf);
+	}
+	fraction = (double)size;
+	while (fraction >= size_unit && i < 8)
+	{
+		fraction /= size_unit;
+		i++;
+	}
+	whole = (int)fraction;
+	{
+		double tenths = (fraction - whole) * 10.0;
+		decimal = (int)tenths;
+		if (tenths - decimal > 0.001)
+			decimal++;
+	}
+	if (decimal >= 10)
+	{
+		whole++;
+		decimal = 0;
+	}
+	if (whole < 10 && i > 0)
+	{
+		len = ft_strlen(ft_itoa(whole));
+		ft_strcpy(buf, ft_itoa(whole));
+		buf[len] = '.';
+		ft_strcpy(buf + len + 1, ft_itoa(decimal));
+		ft_strcpy(buf + len + 2, units[i]);
+	}
+	else
+	{
+		len = ft_strlen(ft_itoa(whole));
+		ft_strcpy(buf, ft_itoa(whole));
+		ft_strcpy(buf + len, units[i]);
+	}
+	return (buf);
+}
+
+char	*getblocksize_human_readable(t_files *files, double size_unit)
+{
+	size_t		blocksize;
+	const char	*units[] = {"K", "M", "G", "T", "P", "E", "Z", "Y"};
+	int			i;
+	static char	buf[32];
+	double		fraction;
+	int			whole;
+	int			decimal;
+	int			len;
+
+	blocksize = getblocksize(files);
+	if (blocksize == 0)
+	{
+		ft_strcpy(buf, "0");
+		return (buf);
+	}
+	i = 0;
+	fraction = (double)blocksize;
+	while (fraction >= size_unit && i < 8)
+	{
+		fraction /= size_unit;
+		i++;
+	}
+	whole = (int)fraction;
+	{
+		double tenths = (fraction - whole) * 10.0;
+		decimal = (int)tenths;
+		if (tenths - decimal > 0.001)
+			decimal++;
+	}
+	if (decimal >= 10)
+	{
+		whole++;
+		decimal = 0;
+	}
+	if (whole < 10)
+	{
+		len = ft_strlen(ft_itoa(whole));
+		ft_strcpy(buf, ft_itoa(whole));
+		buf[len] = '.';
+		ft_strcpy(buf + len + 1, ft_itoa(decimal));
+		ft_strcpy(buf + len + 2, units[i]);
+	}
+	else
+	{
+		len = ft_strlen(ft_itoa(whole));
+		ft_strcpy(buf, ft_itoa(whole));
+		ft_strcpy(buf + len, units[i]);
+	}
+	return (buf);
+}
+
+size_t	getblocksize(t_files *files)
+{
+	int		i;
+	size_t	total_count;
+
+	total_count = 0;
+	i = 0;
+	while (files->files[i])
+	{
+		total_count += files->stats[i].st_blocks;
+		i++;
+	}
+	return (total_count / 2);
+}

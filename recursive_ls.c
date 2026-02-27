@@ -55,7 +55,7 @@ void	print_file_loop(t_files files, t_flags *flags, int *count)
 		return ;
 	cw = (t_colwidths){0, 0, 0, 0};
 	if (flags->long_format)
-		cw = init_colwidths(&files, flags->group, flags->all, flags->human_readable);
+		cw = init_colwidths(&files, flags->owner, flags->all, flags->human_readable);
 	n = 0;
 	i = -1;
 	while (files.files[++i])
@@ -76,7 +76,7 @@ void	print_file_loop(t_files files, t_flags *flags, int *count)
 	if (!flags->long_format)
 	{
 		names[n] = NULL;
-		print_columns(names, n, col_st, flags->color);
+		print_columns(names, n, col_st, flags->color, flags->width);
 	}
 	*count = n;
 	free(names);
@@ -111,7 +111,7 @@ int	opendir_and_print(const char *base_path, t_flags *flags, t_files *files)
 	if (flags->long_format || flags->size)
 	{
 		if (flags->human_readable)
-			ft_dprintf(1, "total %s\n", getblocksize_human_readable(files));
+			ft_dprintf(1, "total %s\n", getblocksize_human_readable(files, flags->size_unit));
 		else
 			ft_dprintf(1, "total %u\n", getblocksize(files));
 	}

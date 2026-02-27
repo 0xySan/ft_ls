@@ -13,125 +13,6 @@
 #include "ft_ls.h"
 #include <grp.h>
 
-char *get_size_human_readable(off_t size)
-{
-    const char	*units[] = {"", "K", "M", "G", "T", "P"};
-    int			i;
-    static char	buf[32];
-    int			len;
-    double		fraction;
-    int			whole;
-    int			decimal;
-
-    i = 0;
-    if (size == 0)
-    {
-        ft_strcpy(buf, "0");
-        return (buf);
-    }
-    fraction = (double)size;
-    while (fraction >= 1024.0 && i < 5)
-    {
-        fraction /= 1024.0;
-        i++;
-    }
-    whole = (int)fraction;
-    {
-        double tenths = (fraction - whole) * 10.0;
-        decimal = (int)tenths;
-        if (tenths - decimal > 0.001)
-            decimal++;
-    }
-    if (decimal >= 10)
-    {
-        whole++;
-        decimal = 0;
-    }
-    if (whole < 10 && i > 0)
-    {
-        len = ft_strlen(ft_itoa(whole));
-        ft_strcpy(buf, ft_itoa(whole));
-        buf[len] = '.';
-        ft_strcpy(buf + len + 1, ft_itoa(decimal));
-        ft_strcpy(buf + len + 2, units[i]);
-    }
-    else
-    {
-        len = ft_strlen(ft_itoa(whole));
-        ft_strcpy(buf, ft_itoa(whole));
-        ft_strcpy(buf + len, units[i]);
-    }
-    return (buf);
-}
-
-char	*getblocksize_human_readable(t_files *files)
-{
-	size_t		blocksize;
-	const char	*units[] = {"K", "M", "G", "T", "P"};
-	int			i;
-	static char	buf[32];
-	double		fraction;
-	int			whole;
-	int			decimal;
-	int			len;
-
-	blocksize = getblocksize(files);
-	if (blocksize == 0)
-	{
-		ft_strcpy(buf, "0");
-		return (buf);
-	}
-	i = 0;
-	fraction = (double)blocksize;
-	while (fraction >= 1024.0 && i < 4)
-	{
-		fraction /= 1024.0;
-		i++;
-	}
-	whole = (int)fraction;
-	{
-		double tenths = (fraction - whole) * 10.0;
-		decimal = (int)tenths;
-		if (tenths - decimal > 0.001)
-			decimal++;
-	}
-	if (decimal >= 10)
-	{
-		whole++;
-		decimal = 0;
-	}
-	if (whole < 10)
-	{
-		len = ft_strlen(ft_itoa(whole));
-		ft_strcpy(buf, ft_itoa(whole));
-		buf[len] = '.';
-		ft_strcpy(buf + len + 1, ft_itoa(decimal));
-		ft_strcpy(buf + len + 2, units[i]);
-	}
-	else
-	{
-		len = ft_strlen(ft_itoa(whole));
-		ft_strcpy(buf, ft_itoa(whole));
-		ft_strcpy(buf + len, units[i]);
-	}
-	return (buf);
-}
-
-size_t	getblocksize(t_files *files)
-{
-	int		i;
-	size_t	total_count;
-
-	total_count = 0;
-	i = 0;
-	while (files->files[i])
-	{
-		total_count += files->stats[i].st_blocks;
-		i++;
-	}
-	return (total_count / 2);
-}
-
 void	getsymlink(struct stat st, char *path, int color)
 {
 	char		target[PATH_MAX];
@@ -198,64 +79,62 @@ static void	print_acl_xattr(const char *path)
 	}
 	if (has_user_xattr(path))
 		buf_write(1, "@", 1);
+}
+
+static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human)
+{
+	int				tmp;
+	static uid_t	lu = (uid_t)-1;
+	static gid_t	lg = (gid_t)-1;
+	static int		pw_len;
+	static int		gr_len;
+
+	tmp = count_digits((unsigned long)st.st_nlink);
+	if (tmp > cw->nlink_w)
+		cw->nlink_w = tmp;
+	if (human)
+		tmp = ft_strlen(get_size_human_readable(st.st_size, 1024.0));
 	else
-		buf_write(1, " ", 1);
+		tmp = count_digits((unsigned long)st.st_size);
+	if (tmp > cw->size_w)
+		cw->size_w = tmp;
+	if (st.st_gid != lg)
+	{
+		struct group *gr = getgrgid(st.st_gid);
+		gr_len = gr ? ft_strlen(gr->gr_name) : 1;
+		lg = st.st_gid;
+	}
+	if (gr_len > cw->group_w)
+		cw->group_w = gr_len;
+	if (!owner)
+	{
+		if (st.st_uid != lu)
+		{
+			struct passwd *pw = getpwuid(st.st_uid);
+			pw_len = pw ? ft_strlen(pw->pw_name) : 1;
+			lu = st.st_uid;
+		}
+		if (pw_len > cw->owner_w)
+			cw->owner_w = pw_len;
+	}
 }
 
-static void	update_cw(t_colwidths *cw, struct stat st, int group, int human)
+t_colwidths	init_colwidths(t_files *files, int owner, int all, int human)
 {
-    int				tmp;
-    static uid_t	lu = (uid_t)-1;
-    static gid_t	lg = (gid_t)-1;
-    static int		pw_len;
-    static int		gr_len;
+	t_colwidths	cw;
+	int			i;
 
-    tmp = count_digits((unsigned long)st.st_nlink);
-    if (tmp > cw->nlink_w)
-        cw->nlink_w = tmp;
-    if (human)
-        tmp = ft_strlen(get_size_human_readable(st.st_size));
-    else
-        tmp = count_digits((unsigned long)st.st_size);
-    if (tmp > cw->size_w)
-        cw->size_w = tmp;
-    if (st.st_gid != lg)
-    {
-        struct group *gr = getgrgid(st.st_gid);
-        gr_len = gr ? ft_strlen(gr->gr_name) : 1;
-        lg = st.st_gid;
-    }
-    if (gr_len > cw->group_w)
-        cw->group_w = gr_len;
-    if (!group)
-    {
-        if (st.st_uid != lu)
-        {
-            struct passwd *pw = getpwuid(st.st_uid);
-            pw_len = pw ? ft_strlen(pw->pw_name) : 1;
-            lu = st.st_uid;
-        }
-        if (pw_len > cw->owner_w)
-            cw->owner_w = pw_len;
-    }
-}
-
-t_colwidths	init_colwidths(t_files *files, int group, int all, int human)
-{
-    t_colwidths	cw;
-    int			i;
-
-    cw = (t_colwidths){0, 0, 0, 0};
-    i = -1;
-    while (files->files[++i])
-    {
-        if (!files->files[i] || !files->real_paths[i])
-            continue ;
-        if (strncmp(files->files[i], ".", 1) == 0 && !all)
-            continue ;
-        update_cw(&cw, files->stats[i], group, human);
-    }
-    return (cw);
+	cw = (t_colwidths){0, 0, 0, 0};
+	i = -1;
+	while (files->files[++i])
+	{
+		if (!files->files[i] || !files->real_paths[i])
+			continue ;
+		if (strncmp(files->files[i], ".", 1) == 0 && !all)
+			continue ;
+		update_cw(&cw, files->stats[i], owner, human);
+	}
+	return (cw);
 }
 
 static void	write_permbits(mode_t m)
@@ -295,6 +174,7 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 	print_file_type(st.st_mode);
 	write_permbits(st.st_mode);
 	print_acl_xattr(path);
+	buf_write(1, " ", 1);
 	if (st.st_uid != last_uid)
 	{
 		pw = getpwuid(st.st_uid);
@@ -331,16 +211,19 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 	}
 	print_padded_num((unsigned long)st.st_nlink, cw.nlink_w);
 	buf_write(1, " ", 1);
-	if (!flags->group)
+	if (!flags->owner)
 	{
 		print_padded_str(pw_buf, cw.owner_w);
 		buf_write(1, " ", 1);
 	}
-	print_padded_str(gr_buf, cw.group_w);
-	buf_write(1, " ", 1);
+	if (!flags->group)
+	{
+		print_padded_str(gr_buf, cw.group_w);
+		buf_write(1, " ", 1);
+	}
 	if (flags->human_readable)
 	{
-		char *hr = get_size_human_readable(st.st_size);
+		char *hr = get_size_human_readable(st.st_size, flags->size_unit);
 		int pad = cw.size_w - ft_strlen(hr);
 		while (pad-- > 0)
 			buf_write(1, " ", 1);

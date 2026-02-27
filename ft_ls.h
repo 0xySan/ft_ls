@@ -36,6 +36,7 @@ typedef struct s_flags
 {
 	int		recursive;
 	int		long_format;
+	int		owner;
 	int		group;
 	int 	directory;
 	int		reverse;
@@ -45,6 +46,8 @@ typedef struct s_flags
 	int		not_sorted;
 	int		color;
 	int		all;
+	int		width;
+	double	size_unit;
 	char	**files;
 	int		file_count;
 	char	*dir_name;
@@ -87,7 +90,7 @@ void	timesort(t_files *files, int low, int high);
 size_t	getblocksize(t_files *files);
 void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw);
 void	swap_stat(struct stat *a, struct stat *b);
-void	print_columns(char **nm, int cnt, struct stat *st, int col);
+void	print_columns(char **nm, int cnt, struct stat *st, int col, int width);
 void	getsymlink(struct stat st, char *path, int color);
 const char	*get_color_code(struct stat *st);
 void	print_color_name(const char *name, struct stat *st, int color);
@@ -110,8 +113,8 @@ int		str_lower_cmp(const char *a, const char *b);
 int		count_digits(unsigned long n);
 void	print_padded_num(unsigned long n, int width);
 void	print_padded_str(const char *s, int width);
-char 	*get_size_human_readable(off_t size);
+char 	*get_size_human_readable(off_t size, double size_unit);
 t_colwidths	init_colwidths(t_files *files, int group, int all, int human);
-char		*getblocksize_human_readable(t_files *files);
+char	*getblocksize_human_readable(t_files *files, double size_unit);
 
 #endif

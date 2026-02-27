@@ -107,7 +107,7 @@ static void	print_col_row(char **nm, struct stat *st, int *p, const char *cc)
 		pad_write(nm[idx], p[1] + 2, cc);
 }
 
-void	print_columns(char **nm, int cnt, struct stat *st, int col)
+void	print_columns(char **nm, int cnt, struct stat *st, int col, int width)
 {
 	int	v[5];
 	int	*cw;
@@ -116,7 +116,10 @@ void	print_columns(char **nm, int cnt, struct stat *st, int col)
 		return ;
 	if (!isatty(1))
 		return (print_col_pipe(nm, cnt, st, col));
-	v[0] = get_term_width();
+	if (width > 0)
+		v[0] = width;
+	else
+		v[0] = get_term_width();
 	cw = malloc(sizeof(int) * (cnt + 1));
 	if (!cw)
 		return ;
