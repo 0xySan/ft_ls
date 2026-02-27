@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ft_dprintf/ft_dprintf.h"
 #include "ft_ls.h"
 
 void	do_other_flag(t_flags *flags, int i)
@@ -94,10 +95,7 @@ void	main_loop(int ac, char **av, t_flags *flags)
 		{
 			if (file_exists(av[i]) == false)
 			{
-				ft_putstr_fd(av[0], 2);
-				ft_putstr_fd(": cannot access '", 2);
-				ft_putstr_fd(av[i], 2);
-				ft_putstr_fd("': No such file or directory\n", 2);
+				ft_dprintf(2, "%s: cannot access '%s': No such file or directory\n", av[0], av[i]);
 				flags->error_code = 2;
 			}
 			flags->files[flags->file_count++] = ft_strdup(av[i]);

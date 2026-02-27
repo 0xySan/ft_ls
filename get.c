@@ -60,7 +60,8 @@ void	getperms(struct stat st)
 	putchar_perm(st.st_mode & S_IXOTH, 'x');
 	pw = getpwuid(st.st_uid);
 	gr = getgrgid(st.st_gid);
-	ft_dprintf(1, " %u %s %s %u ", st.st_nlink, pw->pw_name,
-		gr->gr_name, st.st_size);
+	ft_dprintf(1, " %u %s %s %u ", st.st_nlink,
+		pw ? pw->pw_name : "?",
+		gr ? gr->gr_name : "?", st.st_size);
 	print_mod_time(st);
 }

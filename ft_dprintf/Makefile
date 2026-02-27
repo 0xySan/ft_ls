@@ -1,12 +1,7 @@
-SRCS_FILE = ft_dprintf.c \
-	    ft_ltoa.c \
-	    ft_ptoa.c \
-	    ft_putstr_fd.c \
-	    ft_utoa.c \
-	    ft_count_unsigned.c \
-	    ft_putchar_fd.c \
-	    ft_ultoa.c \
-		ft_dtoa.c
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
+
+SRCS_FILE = ft_dprintf.c ft_puts.c print_format.c put_unit_ptr.c
 
 SRCS = $(addprefix ./,$(SRCS_FILE))
 
@@ -15,16 +10,16 @@ OBJ = $(SRCS:.c=.o)
 NAME = dprintf.a
 
 %.o: %.c ./ft_printf.h
-		@gcc -c -o $@ $< -Wall -Wextra -Werror
+	@cc -c -o $@ $< -Wall -Wextra -Werror
 
 $(NAME): $(OBJ)
-		@ar rc $@ $(OBJ)
+	@ar rc $@ $(OBJ)
 
 clean:
-		@rm -f $(OBJ)
+	@rm -f $(OBJ)
 
 fclean: clean
-		@rm -f $(NAME)
+	@rm -f $(NAME)
 
 all: $(NAME)
 

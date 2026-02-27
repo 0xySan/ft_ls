@@ -10,20 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ft_dprintf/ft_dprintf.h"
 #include "ft_ls.h"
 
 void	put_message_help(char *str)
 {
-	ft_putstr_fd("Usage: ", 1);
-	ft_putstr_fd(str, 1);
-	ft_putstr_fd(" [OPTION]... [FILE]...\n", 1);
-	ft_putstr_fd("Options:\n", 1);
-	ft_putstr_fd("  -a\t\tdo not ignore entries starting with .\n", 1);
-	ft_putstr_fd("  -l\t\tuse a long listing format\n", 1);
-	ft_putstr_fd("  -R\t\tlist subdirectories recursively\n", 1);
-	ft_putstr_fd("  -r\t\treverse order while sorting\n", 1);
-	ft_putstr_fd("  -t\t\tsort by time\n", 1);
-	ft_putstr_fd("  --help\tshow this help message\n", 1);
+	ft_dprintf(1, "Usage: %s [OPTION]... [FILE]...\n", str);
+	ft_dprintf(1, "Options:\n");
+	ft_dprintf(1, "  -a\t\tdo not ignore entries starting with .\n");
+	ft_dprintf(1, "  -l\t\tuse a long listing format\n");
+	ft_dprintf(1, "  -R\t\tlist subdirectories recursively\n");
+	ft_dprintf(1, "  -r\t\treverse order while sorting\n");
+	ft_dprintf(1, "  -t\t\tsort by time\n");
+	ft_dprintf(1, "  --help\tshow this help message\n", 1);
 }
 
 void	init_flags(t_flags *flags)
@@ -54,10 +53,8 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 		flags->time_sort = 1;
 	else
 	{
-		ft_putstr_fd(av[0], 2);
-		ft_putstr_fd(": illegal option -- '", 2);
-		write(1, &av[i][j], 2);
-		ft_putstr_fd("'\nTry 'ft_ls --help' for more informations.\n", 2);
+		ft_dprintf(2, "%s: illegal option -- '%c'\n", av[0], av[i][j]);
+		ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
 		return (1);
 	}
 	return (0);
