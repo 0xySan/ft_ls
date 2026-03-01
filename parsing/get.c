@@ -6,14 +6,13 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 12:01:42 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 18:43:10 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 04:03:45 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ls.h"
-#include <grp.h>
+#include "../ft_ls.h"
 
-void	getsymlink(struct stat st, char *path, int color)
+void	getsymlink(struct stat st, const char *path, int color)
 {
 	char		target[PATH_MAX];
 	ssize_t		len;
@@ -54,8 +53,8 @@ static int	has_user_xattr(const char *path)
 	i = 0;
 	while (i < len)
 	{
-		if (strncmp(buf + i, "system.", 7) != 0
-			&& strncmp(buf + i, "security.", 9) != 0)
+		if (ft_strncmp(buf + i, "system.", 7) != 0
+			&& ft_strncmp(buf + i, "security.", 9) != 0)
 			return (1);
 		i += ft_strlen(buf + i) + 1;
 	}
@@ -130,7 +129,7 @@ t_colwidths	init_colwidths(t_files *files, int owner, int all, int human)
 	{
 		if (!files->files[i] || !files->real_paths[i])
 			continue ;
-		if (strncmp(files->files[i], ".", 1) == 0 && !all)
+		if (ft_strncmp(files->files[i], ".", 1) == 0 && !all)
 			continue ;
 		update_cw(&cw, files->stats[i], owner, human);
 	}

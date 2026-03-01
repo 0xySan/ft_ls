@@ -1,13 +1,14 @@
 FILES		=	main \
-				quick_sort \
-				ft_is \
-				time_sort \
-				get \
+				parsing/ft_is \
+				parsing/get \
+				parsing/flags \
+				parsing/do_flags \
+				printing/printget \
+				printing/malloc_and_put_files \
+				printing/column_print \
+				sorting/quick_sort_files \
+				sorting/quick_sort \
+				sorting/time_sort_files \
+				sorting/time_sort \
 				utils \
-				printget \
-				recursive_ls \
-				flags \
-				time_sort_files \
-				quick_sort_files \
-				malloc_and_put_files \
-				column_print
+				recursive_ls

@@ -6,144 +6,11 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:04:49 by etaquet           #+#    #+#             */
-/*   Updated: 2025/07/15 18:59:54 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 04:04:59 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_dprintf/ft_dprintf.h"
 #include "ft_ls.h"
-#include <string.h>
-
-void	do_other_flag(t_flags *flags, int i)
-{
-	struct stat		st;
-	t_colwidths		cw;
-
-	if (lstat(flags->files[i], &st) != 0)
-		return ;
-	if (flags->long_format)
-	{
-		cw = (t_colwidths){0, 0, 0, 0};
-		getperms(st, flags->files[i], flags, cw);
-		print_color_name(flags->files[i], &st, flags->color);
-		if (S_ISLNK(st.st_mode))
-			getsymlink(st, flags->files[i], flags->color);
-		buf_write(1, "\n", 1);
-	}
-	else
-	{
-		print_color_name(flags->files[i], &st, flags->color);
-		if (!isatty(1))
-			buf_write(1, "\n", 1);
-		else
-			buf_write(1, "  ", 2);
-	}
-}
-
-void	do_recursive_flag(t_flags *flags)
-{
-	int	i;
-	int	count;
-
-	count = 0;
-	i = -1;
-	while (flags->files[++i])
-	{
-		if (is_directory(flags->files[i]) && !is_symlink(flags->files[i]))
-			continue ;
-		do_other_flag(flags, i);
-		count++;
-	}
-	if (count >= 1)
-		ft_dprintf(1, "\n");
-	i = -1;
-	while (flags->files[++i])
-	{
-		if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
-			continue ;
-		if (count >= 1)
-			ft_dprintf(1, "\n");
-		recursive_ls(flags->files[i], flags);
-		count++;
-	}
-}
-
-void	do_flags(t_flags *flags)
-{
-	int			i;
-	char		**non_dirs;
-	struct stat	*nd_st;
-	int			non_dir_count;
-	int			first;
-
-	i = -1;
-	if (flags->directory)
-	{
-		i = -1;
-		while (flags->files[++i])
-		{
-			do_other_flag(flags, i);
-			if (!flags->long_format && isatty(1))
-				continue ;
-			if (!isatty(1) || flags->long_format)
-				continue ;
-		}
-		if (!flags->long_format && isatty(1))
-			buf_write(1, "\n", 1);
-		return ;
-	}
-	if (flags->recursive && flags->file_count >= 1)
-		do_recursive_flag(flags);
-	else
-	{
-		non_dirs = malloc(sizeof(char *) * (flags->file_count + 1));
-		nd_st = malloc(sizeof(struct stat) * (flags->file_count + 1));
-		if (!non_dirs || !nd_st)
-			return ;
-		non_dir_count = 0;
-		first = 1;
-		i = -1;
-		while (flags->files[++i])
-		{
-			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
-			{
-				if (lstat(flags->files[i], &nd_st[non_dir_count]) != 0)
-					continue ;
-				non_dirs[non_dir_count++] = flags->files[i];
-				continue ;
-			}
-		}
-		if (non_dir_count > 0)
-		{
-			non_dirs[non_dir_count] = NULL;
-			if (flags->long_format)
-			{
-				i = -1;
-				while (flags->files[++i])
-				{
-					if (!is_directory(flags->files[i])
-						|| is_symlink(flags->files[i]))
-						do_other_flag(flags, i);
-				}
-			}
-			else
-				print_columns(non_dirs, non_dir_count, nd_st, flags->color, flags->width);
-			first = 0;
-		}
-		i = -1;
-		while (flags->files[++i])
-		{
-			if (!is_directory(flags->files[i]) || is_symlink(flags->files[i]))
-				continue ;
-			if (!first)
-				ft_dprintf(1, "\n");
-			recursive_ls(flags->files[i], flags);
-			first = 0;
-		}
-		free(non_dirs);
-		free(nd_st);
-	}
-}
 
 void	main_loop(int ac, char **av, t_flags *flags)
 {
@@ -154,7 +21,7 @@ void	main_loop(int ac, char **av, t_flags *flags)
 	{
 		if (av[i][0] == '-')
 		{
-			if (strcmp(av[i], "--width") == 0)
+			if (ft_strcmp(av[i], "--width") == 0)
 			{
 				if (i + 1 >= ac || !av[i + 1][0] || av[i + 1][0] == '-')
 				{

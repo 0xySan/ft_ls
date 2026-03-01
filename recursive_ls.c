@@ -6,11 +6,10 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:00:43 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 20:16:38 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 04:06:44 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_dprintf/ft_dprintf.h"
 #include "ft_ls.h"
 
 static void	print_long_entry(t_files *f, int i, t_flags *fl, t_colwidths cw)
@@ -40,7 +39,7 @@ static int	count_visible(t_files *files, int all)
 	return (n);
 }
 
-void	print_file_loop(t_files files, t_flags *flags, int *count)
+static void	print_file_loop(t_files files, t_flags *flags, int *count)
 {
 	int			i;
 	char		**names;
@@ -90,7 +89,7 @@ static void	free_files(t_files *files)
 	free(files->files);
 }
 
-int	opendir_and_print(const char *base_path, t_flags *flags, t_files *files)
+static int	opendir_and_print(const char *base_path, t_flags *flags, t_files *files)
 {
 	DIR		*dir;
 
@@ -119,7 +118,7 @@ int	opendir_and_print(const char *base_path, t_flags *flags, t_files *files)
 	return (1);
 }
 
-void	check_recursion(t_files files, t_flags *flags, int i, int printed_count)
+static void	check_recursion(t_files files, t_flags *flags, int i, int printed_count)
 {
 	if (!files.real_paths[i])
 		return ;
@@ -147,8 +146,8 @@ void	recursive_ls(const char *base_path, t_flags *flags)
 	{
 		if (!files.files[i] || !files.real_paths[i])
 			continue ;
-		if (strcmp(files.files[i], ".") == 0
-			|| strcmp(files.files[i], "..") == 0)
+		if (ft_strcmp(files.files[i], ".") == 0
+			|| ft_strcmp(files.files[i], "..") == 0)
 		{
 			free(files.files[i]);
 			free(files.real_paths[i]);

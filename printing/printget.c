@@ -6,13 +6,13 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 18:41:33 by etaquet           #+#    #+#             */
-/*   Updated: 2025/07/15 19:08:51 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 03:54:40 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ls.h"
+#include "../ft_ls.h"
 
-void	putchar_perm(int cond, char c)
+static void	putchar_perm(int cond, char c)
 {
 	if (cond)
 		buf_write(1, &c, 1);

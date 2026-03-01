@@ -6,11 +6,11 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 11:09:00 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 19:05:46 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 03:57:28 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ls.h"
+#include "../ft_ls.h"
 
 int	is_symlink(const char *path)
 {
@@ -19,15 +19,6 @@ int	is_symlink(const char *path)
 	if (lstat(path, &st) != 0)
 		return (0);
 	return (S_ISLNK(st.st_mode));
-}
-
-int	is_executable_file(const char *path)
-{
-	struct stat	st;
-
-	if (stat(path, &st) != 0)
-		return (0);
-	return (S_ISREG(st.st_mode) && access(path, X_OK) == 0);
 }
 
 char	*get_real_path(const char *base_path, const char *path)

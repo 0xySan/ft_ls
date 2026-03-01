@@ -6,17 +6,11 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:39:57 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 19:42:11 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 03:56:00 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_ls.h"
-
-typedef struct s_dnode
-{
-	char			*name;
-	struct s_dnode	*next;
-}	t_dnode;
+#include "../ft_ls.h"
 
 static t_dnode	*collect_entries(DIR *d, t_flags *f, int *count)
 {
@@ -104,6 +98,18 @@ static void	reverse_entries(t_files *t, int n)
 		swap(&t->files[i], &t->files[n - 1 - i]);
 		swap(&t->real_paths[i], &t->real_paths[n - 1 - i]);
 		swap_stat(&t->stats[i], &t->stats[n - 1 - i]);
+		i++;
+	}
+}
+
+void	reverse_files(char **files, int n)
+{
+	int	i;
+
+	i = 0;
+	while (i < n / 2)
+	{
+		swap(&files[i], &files[n - 1 - i]);
 		i++;
 	}
 }

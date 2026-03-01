@@ -32,7 +32,8 @@ SRCS_FILE = ft_atoi.c \
 			ft_substr.c \
 			ft_tolower.c \
 			ft_toupper.c \
-			ft_strcpy.c
+			ft_strcpy.c \
+			ft_strcmp.c
 
 BONUS_FILE = 	ft_lstadd_back_bonus.c \
 				ft_lstadd_front_bonus.c \

@@ -6,12 +6,11 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 20:12:49 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/01 04:03:30 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_dprintf/ft_dprintf.h"
-#include "ft_ls.h"
+#include "../ft_ls.h"
 
 void	put_message_help(char *str)
 {
@@ -90,6 +89,7 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 	{
 		flags->all = 1;
 		flags->not_sorted = 1;
+		flags->color = 0;
 	}
 	else if (av[i][j] == 'U')
 		flags->not_sorted = 1;
@@ -113,17 +113,17 @@ int	check_flags_loop(char **av, t_flags *flags, int i)
 {
 	int	j;
 
-	if (strcmp(av[i], "--help") == 0)
+	if (ft_strcmp(av[i], "--help") == 0)
 	{
 		put_message_help(av[0]);
 		return (2);
 	}
-	if (strcmp(av[i], "--color") == 0)
+	if (ft_strcmp(av[i], "--color") == 0)
 	{
 		flags->color = 1;
 		return (0);
 	}
-	if (strcmp(av[i], "--si") == 0)
+	if (ft_strcmp(av[i], "--si") == 0)
 	{
 		flags->size_unit = 1000.0;
 		flags->human_readable = 1;

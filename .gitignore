@@ -3,3 +3,4 @@ obj
 ft_ls
 a.out
 ft_dprintf/dprintf.a
+libft/libft.a
