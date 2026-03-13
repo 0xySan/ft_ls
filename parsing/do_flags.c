@@ -21,7 +21,20 @@ void	do_other_flag(t_flags *flags, const char *filename)
 		return ;
 	if (flags->long_format)
 	{
-		cw = (t_colwidths){0, 0, 0, 0};
+		cw = (t_colwidths){0, 0, 0, 0, 0};
+		if (flags->human_readable)
+			cw.size_w = ft_strlen(get_size_human_readable(st.st_size, flags->size_unit));
+		else
+			cw.size_w = count_digits((unsigned long)st.st_size);
+		if (flags->size)
+		{
+			size_t blocks = (size_t)(st.st_blocks / 2);
+			if (flags->human_readable)
+				cw.blocks_w = ft_strlen(get_blocks_human_readable(blocks, flags->size_unit));
+			else
+				cw.blocks_w = count_digits((unsigned long)blocks);
+			print_block_prefix(st, cw.blocks_w, flags->human_readable, flags->size_unit);
+		}
 		getperms(st, filename, flags, cw);
 		print_color_name(filename, &st, flags->color);
 		if (S_ISLNK(st.st_mode))
@@ -114,7 +127,7 @@ void	do_files(t_flags *flags)
 				do_other_flag(flags, non_dirs[i]);
 		}
 		else
-			print_columns(non_dirs, non_dir_count, nd_st, flags->color, flags->width);
+			print_columns(non_dirs, non_dir_count, nd_st, flags);
 		first = 0;
 	}
 	i = -1;

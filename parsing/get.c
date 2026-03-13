@@ -80,7 +80,8 @@ static void	print_acl_xattr(const char *path)
 		buf_write(1, "@", 1);
 }
 
-static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human)
+static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
+	int show_blocks, double size_unit)
 {
 	int				tmp;
 	static uid_t	lu = (uid_t)-1;
@@ -92,11 +93,21 @@ static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human)
 	if (tmp > cw->nlink_w)
 		cw->nlink_w = tmp;
 	if (human)
-		tmp = ft_strlen(get_size_human_readable(st.st_size, 1024.0));
+		tmp = ft_strlen(get_size_human_readable(st.st_size, size_unit));
 	else
 		tmp = count_digits((unsigned long)st.st_size);
 	if (tmp > cw->size_w)
 		cw->size_w = tmp;
+	if (show_blocks)
+	{
+		size_t blocks = (size_t)(st.st_blocks / 2);
+		if (human)
+			tmp = ft_strlen(get_blocks_human_readable(blocks, size_unit));
+		else
+			tmp = count_digits((unsigned long)blocks);
+		if (tmp > cw->blocks_w)
+			cw->blocks_w = tmp;
+	}
 	if (st.st_gid != lg)
 	{
 		struct group *gr = getgrgid(st.st_gid);
@@ -118,12 +129,13 @@ static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human)
 	}
 }
 
-t_colwidths	init_colwidths(t_files *files, int owner, int all, int human)
+t_colwidths	init_colwidths(t_files *files, int owner, int all, int human,
+	int show_blocks, double size_unit)
 {
 	t_colwidths	cw;
 	int			i;
 
-	cw = (t_colwidths){0, 0, 0, 0};
+	cw = (t_colwidths){0, 0, 0, 0, 0};
 	i = -1;
 	while (files->files[++i])
 	{
@@ -131,7 +143,7 @@ t_colwidths	init_colwidths(t_files *files, int owner, int all, int human)
 			continue ;
 		if (ft_strncmp(files->files[i], ".", 1) == 0 && !all)
 			continue ;
-		update_cw(&cw, files->stats[i], owner, human);
+		update_cw(&cw, files->stats[i], owner, human, show_blocks, size_unit);
 	}
 	return (cw);
 }

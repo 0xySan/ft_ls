@@ -78,6 +78,7 @@ typedef struct s_colwidths
 	int		owner_w;
 	int		group_w;
 	int		size_w;
+	int		blocks_w;
 }	t_colwidths;
 
 typedef struct s_dnode
@@ -97,7 +98,7 @@ char		*get_real_path(const char *base_path, const char *path);
 int			is_symlink(const char *path);
 int			is_directory(const char *path);
 int			check_flags_loop(char **av, t_flags *flags, int i);
-t_colwidths	init_colwidths(t_files *files, int group, int all, int human);
+t_colwidths	init_colwidths(t_files *files, int group, int all, int human, int show_blocks, double size_unit);
 
 /* PRINTING DIRECTORY */
 
@@ -105,7 +106,7 @@ void		print_file_type(mode_t mode);
 void		print_mod_time(struct stat st);
 void		reverse_files(char **files, int n);
 void		malloc_and_put_files(t_files *t, DIR *d, t_flags *f, const char *bp);
-void		print_columns(char **nm, int cnt, struct stat *st, int col, int width);
+void		print_columns(char **nm, int cnt, struct stat *st, t_flags *flags);
 
 /* SORTING DIRECTORY */
 
@@ -129,6 +130,8 @@ size_t		getblocksize(t_files *files);
 bool		file_exists(char *filename);
 char 		*get_size_human_readable(off_t size, double size_unit);
 char		*getblocksize_human_readable(t_files *files, double size_unit);
+char		*get_blocks_human_readable(size_t blocks, double size_unit);
+void		print_block_prefix(struct stat st, int width, int human, double size_unit);
 const char	*get_color_code(struct stat *st);
 
 #endif

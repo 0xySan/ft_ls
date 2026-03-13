@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:04:49 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 04:04:59 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/13 22:02:24 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,17 @@ void	main_loop(int ac, char **av, t_flags *flags)
 	{
 		if (av[i][0] == '-')
 		{
-			if (ft_strcmp(av[i], "--width") == 0)
+			if (ft_strncmp(av[i], "--width=", 8) == 0)
+			{
+				if (!av[i][8])
+				{
+					ft_dprintf(2, "%s: option requires an argument -- 'width'\n", av[0]);
+					ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
+					exit_help(1, flags, flags->file_count);
+				}
+				flags->width = ft_atoi(av[i] + 8);
+			}
+			else if (ft_strcmp(av[i], "--width") == 0)
 			{
 				if (i + 1 >= ac || !av[i + 1][0] || av[i + 1][0] == '-')
 				{

@@ -14,6 +14,8 @@
 
 static void	print_long_entry(t_files *f, int i, t_flags *fl, t_colwidths cw)
 {
+	if (fl->size)
+		print_block_prefix(f->stats[i], cw.blocks_w, fl->human_readable, fl->size_unit);
 	getperms(f->stats[i], f->real_paths[i], fl, cw);
 	print_color_name(f->files[i], &f->stats[i], fl->color);
 	if (S_ISLNK(f->stats[i].st_mode))
@@ -52,9 +54,10 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	col_st = malloc(sizeof(struct stat) * (n + 1));
 	if (!names || !col_st)
 		return ;
-	cw = (t_colwidths){0, 0, 0, 0};
+	cw = (t_colwidths){0, 0, 0, 0, 0};
 	if (flags->long_format)
-		cw = init_colwidths(&files, flags->owner, flags->all, flags->human_readable);
+		cw = init_colwidths(&files, flags->owner, flags->all,
+				flags->human_readable, flags->size, flags->size_unit);
 	n = 0;
 	i = -1;
 	while (files.files[++i])
@@ -75,7 +78,7 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	if (!flags->long_format)
 	{
 		names[n] = NULL;
-		print_columns(names, n, col_st, flags->color, flags->width);
+		print_columns(names, n, col_st, flags);
 	}
 	*count = n;
 	free(names);

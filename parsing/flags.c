@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 04:03:30 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/13 22:02:30 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,13 @@ void	init_flags(t_flags *flags)
 	flags->time_sort = 0;
 	flags->color = 0;
 	flags->all = 0;
+	flags->not_sorted = 0;
 	flags->size = 0;
 	flags->human_readable = 0;
 	flags->file_count = 0;
 	flags->error_code = 0;
 	flags->last_code = 0;
-	flags->width = 0;
+	flags->width = -1;
 	flags->size_unit = 1024.0;
 	flags->dir_name = NULL;
 	flags->dir_flag = false;
