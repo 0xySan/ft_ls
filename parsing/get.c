@@ -61,6 +61,7 @@ static int	has_user_xattr(const char *path)
 	return (0);
 }
 
+#if __has_include(<sys/acl.h>)
 static void	print_acl_xattr(const char *path)
 {
 	acl_t	acl;
@@ -79,6 +80,7 @@ static void	print_acl_xattr(const char *path)
 	if (has_user_xattr(path))
 		buf_write(1, "@", 1);
 }
+#endif
 
 static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
 	int show_blocks, double size_unit)
@@ -184,7 +186,9 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 
 	print_file_type(st.st_mode);
 	write_permbits(st.st_mode);
+	#if __has_include(<sys/acl.h>)
 	print_acl_xattr(path);
+	#endif
 	buf_write(1, " ", 1);
 	if (st.st_uid != last_uid)
 	{

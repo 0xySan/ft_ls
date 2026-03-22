@@ -25,8 +25,10 @@
 # include <grp.h>
 # include <pwd.h>
 # include <time.h>
+#if __has_include(<sys/acl.h>)
 # include <sys/acl.h>
 # include <acl/libacl.h>
+#endif
 # include <sys/xattr.h>
 # include <sys/ioctl.h>
 # include "ft_dprintf/ft_dprintf.h"
