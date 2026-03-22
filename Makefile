@@ -14,6 +14,15 @@ RESET		=	$(shell tput -Txterm sgr0)
 CC			=	cc
 CFLAGS		=	-g -O3
 
+HAS_LIBACL := $(shell \
+	echo "int main(void){return 0;}" | \
+	$(CC) -x c - -lacl -o /dev/null \
+	> /dev/null 2>&1 && echo yes || echo no)
+
+ifeq ($(HAS_LIBACL),yes)
+	LIBS += -lacl
+endif
+
 include Files.mk
 
 SRCS		= 	$(addsuffix .c,$(addprefix $(SRC_DIR)/,$(FILES)))
@@ -36,7 +45,7 @@ $(NAME): $(OBJS)
 	@make --no-print-directory -s -C libft
 	@echo "$(BOLD)$(RED)Ft_dprintf compiled$(RESET)"
 	@if [ -f ./$(NAME) ]; then echo "$(BOLD)$(BLUE)Executable already exists.$(RESET)"; else echo "$(BOLD)$(BLUE)Created the executable : $(NAME)$(RESET)"; fi
-	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) ft_dprintf/dprintf.a libft/libft.a -lacl
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) ft_dprintf/dprintf.a libft/libft.a $(LIBS)
 	@echo "$(BOLD)$(PURPLE)Finished the compilation of the Makefile$(RESET)"
 	@$(eval NUMB3=$(shell echo $$(($(NUMB3)+1))))
 
