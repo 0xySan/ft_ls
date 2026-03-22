@@ -31,12 +31,14 @@ void	put_message_help(char *str)
 	ft_dprintf(1, "  -U\t\tdo not sort; list entries in directory order\n");
 	ft_dprintf(1, "  -1\t\tlist one file per line\n");
 	ft_dprintf(1, "  --width=COLS\tset output width to COLS.  0 means no limit\n");
-	ft_dprintf(1, "  --help\tdisplay this help and exit\n", 1);
+	ft_dprintf(1, "  --help\tdisplay this help and exit\n");
 	ft_dprintf(1, "  --color\tenable colorized output\n");
+	ft_dprintf(1, "  --version\toutput version information and exit\n");
 	ft_dprintf(1, "Exit status:\n");
 	ft_dprintf(1, "  0  if OK,\n");
 	ft_dprintf(1, "  1  if minor problems (e.g., cannot access subdirectory),\n");
-	ft_dprintf(1, "  2  if serious trouble (e.g., cannot access command-line argument).\n");
+	ft_dprintf(1, "  2  if serious trouble (e.g., cannot access command-line argument).\n\n");
+	ft_dprintf(1, "Report bugs to: etaquet@student.42lehavre.fr");
 	buf_flush(1);
 }
 
@@ -124,6 +126,11 @@ int	check_flags_loop(char **av, t_flags *flags, int i)
 	if (ft_strcmp(av[i], "--help") == 0)
 	{
 		put_message_help(av[0]);
+		return (2);
+	}
+	if (ft_strcmp(av[i], "--version") == 0)
+	{
+		ft_dprintf(1, "%s: version 1.0\n\tMade with love by etaquet\n", av[0]);
 		return (2);
 	}
 	if (ft_strcmp(av[i], "--color") == 0)
