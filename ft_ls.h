@@ -47,6 +47,7 @@ typedef struct s_flags
 	int		color;
 	int		all;
 	int		width;
+	int		one;
 	double	size_unit;
 	char	**files;
 	int		file_count;

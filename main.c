@@ -29,7 +29,8 @@ void	main_loop(int ac, char **av, t_flags *flags)
 					ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
 					exit_help(1, flags, flags->file_count);
 				}
-				flags->width = ft_atoi(av[i] + 8);
+				if (!flags->one)
+					flags->width = ft_atoi(av[i] + 8);
 			}
 			else if (ft_strcmp(av[i], "--width") == 0)
 			{
@@ -39,7 +40,8 @@ void	main_loop(int ac, char **av, t_flags *flags)
 					ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
 					exit_help(1, flags, flags->file_count);
 				}
-				flags->width = ft_atoi(av[i + 1]);
+				if (!flags->one)
+					flags->width = ft_atoi(av[i + 1]);
 				i++;
 			}
 			else

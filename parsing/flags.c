@@ -29,6 +29,7 @@ void	put_message_help(char *str)
 	ft_dprintf(1, "  -s\t\tprint size of each file in blocks\n");
 	ft_dprintf(1, "  -t\t\tsort by time\n");
 	ft_dprintf(1, "  -U\t\tdo not sort; list entries in directory order\n");
+	ft_dprintf(1, "  -1\t\tlist one file per line\n");
 	ft_dprintf(1, "  --width=COLS\tset output width to COLS.  0 means no limit\n");
 	ft_dprintf(1, "  --help\tdisplay this help and exit\n", 1);
 	ft_dprintf(1, "  --color\tenable colorized output\n");
@@ -53,6 +54,7 @@ void	init_flags(t_flags *flags)
 	flags->not_sorted = 0;
 	flags->size = 0;
 	flags->human_readable = 0;
+	flags->one = 0;
 	flags->file_count = 0;
 	flags->error_code = 0;
 	flags->last_code = 0;
@@ -100,6 +102,11 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 	{
 		flags->human_readable = 1;
 		flags->size_unit = 1024.0;
+	}
+	else if (av[i][j] == '1')
+	{
+		flags->one = 1;
+		flags->width = 1;
 	}
 	else
 	{
