@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:35:04 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:05:27 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ typedef struct s_flags
 	int		not_sorted;
 	int		color;
 	int		all;
+	int		almost_all;
 	int		width;
 	int		one;
 	int		hyperlink;
@@ -105,7 +106,8 @@ char		*get_real_path(const char *base_path, const char *path);
 int			is_symlink(const char *path);
 int			is_directory(const char *path);
 int			check_flags_loop(char **av, t_flags *flags, int i);
-t_colwidths	init_colwidths(t_files *files, int group, int all, int human, int show_blocks, double size_unit);
+t_colwidths	init_colwidths(t_files *files, int group, int all,
+				int almost_all, int human, int show_blocks, double size_unit);
 
 /* PRINTING DIRECTORY */
 
@@ -129,7 +131,8 @@ int			str_lower_cmp(const char *a, const char *b);
 
 void		print_padded_num(unsigned long n, int width);
 void		print_padded_str(const char *s, int width);
-void		print_color_name(const char *name, struct stat *st, int color);
+void		print_color_name(const char *name, const char *path,
+				struct stat *st, int color);
 void		recursive_ls(const char *base_path, t_flags *flags);
 int			count_digits(unsigned long n);
 int			count_files(char **av);
@@ -140,6 +143,7 @@ char		*getblocksize_human_readable(t_files *files, double size_unit);
 char		*get_blocks_human_readable(size_t blocks, double size_unit);
 void		print_block_prefix(struct stat st, int width, int human, double size_unit);
 const char	*get_color_code(struct stat *st, const char *name);
+const char	*get_orphan_link_color_code(void);
 
 // check.c
 
@@ -151,7 +155,8 @@ char		*build_hyperlink_path(const char *raw_path);
 void		print_name_hyperlink(const char *name, struct stat *st, t_flags *flags, const char *path);
 void		write_hyperlink_open(const char *hyperlink);
 void		write_hyperlink_close(void);
-void		print_normal_name(const char *name, struct stat *st, t_flags *flags);
+void		print_normal_name(const char *name, const char *path,
+				struct stat *st, t_flags *flags);
 void		print_name_with_hyperlink(const char *name, const char *path, struct stat *st, t_flags *flags);
 void		print_symlink_with_hyperlink(struct stat st, const char *path, int color, t_flags *flags, const char *hyperlink);
 

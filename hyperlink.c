@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/26 20:48:16 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:45:26 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:00:52 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,12 @@ void	write_hyperlink_close(void)
 	buf_write(1, "\e]8;;\e\\", 7);
 }
 
-void	print_normal_name(const char *name, struct stat *st, t_flags *flags)
+void	print_normal_name(const char *name, const char *path,
+	struct stat *st, t_flags *flags)
 {
 	if (flags->color && st)
 	{
-		print_color_name(name, st, flags->color);
+		print_color_name(name, path, st, flags->color);
 		print_file_type_suffix(st, flags);
 	}
 	else
@@ -106,17 +107,17 @@ void	print_name_with_hyperlink(const char *name, const char *path,
 
 	if (!flags->hyperlink || !path)
 	{
-		print_normal_name(name, st, flags);
+		print_normal_name(name, path ? path : name, st, flags);
 		return ;
 	}
 	hyperlink = build_hyperlink_path(path);
 	if (!hyperlink)
 	{
-		print_normal_name(name, st, flags);
+		print_normal_name(name, path, st, flags);
 		return ;
 	}
 	write_hyperlink_open(hyperlink);
-	print_normal_name(name, st, flags);
+	print_normal_name(name, path, st, flags);
 	write_hyperlink_close();
 	free(hyperlink);
 }
@@ -139,8 +140,13 @@ void	print_symlink_with_hyperlink(struct stat st, const char *path,
 	if (flags->hyperlink && hyperlink)
 		write_hyperlink_open(hyperlink);
 	cc = NULL;
-	if (color && stat(path, &st_target) == 0)
-		cc = get_color_code(&st_target, target);
+	if (color)
+	{
+		if (stat(path, &st_target) == 0)
+			cc = get_color_code(&st_target, target);
+		else
+			cc = get_orphan_link_color_code();
+	}
 	if (cc)
 	{
 		buf_write(1, cc, ft_strlen(cc));

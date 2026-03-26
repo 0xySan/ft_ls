@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 12:01:42 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:23:52 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:05:48 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,13 @@ void	getsymlink(struct stat st, const char *path, int color)
 			target[len] = '\0';
 			buf_write(1, " -> ", 4);
 			cc = NULL;
-			if (color && stat(path, &st_target) == 0)
-				cc = get_color_code(&st_target, target);
+			if (color)
+			{
+				if (stat(path, &st_target) == 0)
+					cc = get_color_code(&st_target, target);
+				else
+					cc = get_orphan_link_color_code();
+			}
 			if (cc)
 			{
 				buf_write(1, cc, ft_strlen(cc));
@@ -138,8 +143,8 @@ static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
 	}
 }
 
-t_colwidths	init_colwidths(t_files *files, int owner, int all, int human,
-	int show_blocks, double size_unit)
+t_colwidths	init_colwidths(t_files *files, int owner, int all,
+	int almost_all, int human, int show_blocks, double size_unit)
 {
 	t_colwidths	cw;
 	int			i;
@@ -150,7 +155,10 @@ t_colwidths	init_colwidths(t_files *files, int owner, int all, int human,
 	{
 		if (!files->files[i] || !files->real_paths[i])
 			continue ;
-		if (ft_strncmp(files->files[i], ".", 1) == 0 && !all)
+		if (ft_strncmp(files->files[i], ".", 1) == 0 && !all
+			&& (!almost_all
+				|| ft_strcmp(files->files[i], ".") == 0
+				|| ft_strcmp(files->files[i], "..") == 0))
 			continue ;
 		if (get_acl_xattr_mark(files->real_paths[i]) != ' ')
 			cw.acl_mark = 1;

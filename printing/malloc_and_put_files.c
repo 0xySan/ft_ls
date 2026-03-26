@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:39:57 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 03:56:00 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:05:34 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,10 @@ static t_dnode	*collect_entries(DIR *d, t_flags *f, int *count)
 	e = readdir(d);
 	while (e)
 	{
-		if (!(e->d_name[0] == '.' && !f->all))
+		if (!((e->d_name[0] == '.') && !f->all
+				&& (!f->almost_all
+					|| ft_strcmp(e->d_name, ".") == 0
+					|| ft_strcmp(e->d_name, "..") == 0)))
 		{
 			node = malloc(sizeof(t_dnode));
 			if (!node)

@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 18:34:03 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:03:35 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:00:37 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,13 +279,31 @@ const char	*get_color_code(struct stat *st, const char *name)
 	return (default_color_code(st));
 }
 
-void	print_color_name(const char *name, struct stat *st, int color)
+const char	*get_orphan_link_color_code(void)
+{
+	const char	*raw;
+
+	raw = ls_colors_lookup("or");
+	if (!raw)
+		raw = ls_colors_lookup("mi");
+	if (raw)
+		return (ls_color_raw_to_ansi(raw));
+	return ("\033[01;05;37;41m");
+}
+
+void	print_color_name(const char *name, const char *path, struct stat *st, int color)
 {
 	const char	*cc;
+	struct stat	target;
 
 	cc = NULL;
 	if (color && st)
-		cc = get_color_code(st, name);
+	{
+		if (S_ISLNK(st->st_mode) && path && stat(path, &target) != 0)
+			cc = get_orphan_link_color_code();
+		else
+			cc = get_color_code(st, name);
+	}
 	if (cc)
 	{
 		buf_write(1, cc, ft_strlen(cc));

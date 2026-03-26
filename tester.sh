@@ -65,9 +65,9 @@ run_ft_ls() {
 	local err_file="$2"
 	shift 2
 	if [[ "$USE_VALGRIND" -eq 1 ]]; then
-		"${VALGRIND_ARGS[@]}" "$FT_LS" "$@" >"$out_file" 2>"$err_file"
+		"${VALGRIND_ARGS[@]}" "$FT_LS" --color=always "$@" >"$out_file" 2>"$err_file"
 	else
-		"$FT_LS" "$@" >"$out_file" 2>"$err_file"
+		"$FT_LS" --color=always "$@" >"$out_file" 2>"$err_file"
 	fi
 	return $?
 }
@@ -76,8 +76,29 @@ run_ls() {
 	local out_file="$1"
 	local err_file="$2"
 	shift 2
-	LC_ALL=C ls "$@" >"$out_file" 2>"$err_file"
+	LC_ALL=C ls --color=always "$@" >"$out_file" 2>"$err_file"
 	return $?
+}
+
+strip_ansi_to() {
+	local in_file="$1"
+	local out_file="$2"
+	python3 - "$in_file" "$out_file" <<'PY'
+import re
+import sys
+
+src = sys.argv[1]
+dst = sys.argv[2]
+
+with open(src, 'rb') as f:
+    data = f.read().decode('utf-8', errors='replace')
+
+data = data.replace('\r', '')
+data = re.sub(r'\x1B\[[0-9;]*[A-Za-z]', '', data)
+
+with open(dst, 'w', encoding='utf-8') as f:
+    f.write(data)
+PY
 }
 
 compare_case() {
@@ -88,6 +109,8 @@ compare_case() {
 	local ft_err="$TMP_DIR/ft_${TOTAL}.err"
 	local ls_out="$TMP_DIR/ls_${TOTAL}.out"
 	local ls_err="$TMP_DIR/ls_${TOTAL}.err"
+	local ft_cmp="$TMP_DIR/ft_${TOTAL}.cmp"
+	local ls_cmp="$TMP_DIR/ls_${TOTAL}.cmp"
 	local ft_rc
 	local ls_rc
 
@@ -97,6 +120,8 @@ compare_case() {
 	ft_rc=$?
 	eval "run_ls \"$ls_out\" \"$ls_err\" $args \"$target\""
 	ls_rc=$?
+	strip_ansi_to "$ft_out" "$ft_cmp"
+	strip_ansi_to "$ls_out" "$ls_cmp"
 
 	if [[ "$HEAD_LINES" -gt 0 ]]; then
 		echo "----- $name : ft_ls (head -n $HEAD_LINES) -----"
@@ -111,10 +136,10 @@ compare_case() {
 		return
 	fi
 
-	if ! diff -u "$ft_out" "$ls_out" >/dev/null 2>&1; then
+	if ! diff -u "$ft_cmp" "$ls_cmp" >/dev/null 2>&1; then
 		FAILED=$((FAILED + 1))
 		print_status "FAIL" "$name (stdout differs)"
-		diff -u "$ft_out" "$ls_out" | head -n 40
+		diff -u "$ft_cmp" "$ls_cmp" | head -n 40
 		return
 	fi
 
@@ -202,6 +227,7 @@ run_suite() {
 
 	compare_case "default" "" "$target"
 	compare_case "all (-a)" "-a" "$target"
+	compare_case "almost all (-A)" "-A" "$target"
 	compare_case "directory (-d)" "-d" "$target"
 	compare_case "long (-l)" "-l" "$target"
 	compare_case "long all (-la)" "-la" "$target"

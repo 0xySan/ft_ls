@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:00:43 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 20:51:31 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:05:43 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,18 +26,18 @@ static void	print_long_entry(t_files *f, int i, t_flags *fl, t_colwidths cw)
 	if (fl->hyperlink && hyperlink)
 	{
 		write_hyperlink_open(hyperlink);
-		print_normal_name(f->files[i], &f->stats[i], fl);
+		print_normal_name(f->files[i], f->real_paths[i], &f->stats[i], fl);
 		write_hyperlink_close();
 	}
 	else
-		print_normal_name(f->files[i], &f->stats[i], fl);
+		print_normal_name(f->files[i], f->real_paths[i], &f->stats[i], fl);
 	print_symlink_with_hyperlink(f->stats[i], f->real_paths[i], fl->color,
 		fl, hyperlink);
 	buf_write(1, "\n", 1);
 	free(hyperlink);
 }
 
-static int	count_visible(t_files *files, int all)
+static int	count_visible(t_files *files, int all, int almost_all)
 {
 	int	i;
 	int	n;
@@ -48,7 +48,10 @@ static int	count_visible(t_files *files, int all)
 	{
 		if (!files->files[i] || !files->real_paths[i])
 			continue ;
-		if (files->files[i][0] == '.' && !all)
+		if (files->files[i][0] == '.' && !all
+			&& (!almost_all
+				|| ft_strcmp(files->files[i], ".") == 0
+				|| ft_strcmp(files->files[i], "..") == 0))
 			continue ;
 		n++;
 	}
@@ -64,7 +67,7 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	int			n;
 	t_colwidths	cw;
 
-	n = count_visible(&files, flags->all);
+	n = count_visible(&files, flags->all, flags->almost_all);
 	names = malloc(sizeof(char *) * (n + 1));
 	paths = malloc(sizeof(char *) * (n + 1));
 	col_st = malloc(sizeof(struct stat) * (n + 1));
@@ -73,6 +76,7 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	cw = (t_colwidths){0, 0, 0, 0, 0};
 	if (flags->long_format)
 		cw = init_colwidths(&files, flags->owner, flags->all,
+				flags->almost_all,
 				flags->human_readable, flags->size, flags->size_unit);
 	n = 0;
 	i = -1;
@@ -80,7 +84,10 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	{
 		if (!files.files[i] || !files.real_paths[i])
 			continue ;
-		if (files.files[i][0] == '.' && !flags->all)
+		if (files.files[i][0] == '.' && !flags->all
+			&& (!flags->almost_all
+				|| ft_strcmp(files.files[i], ".") == 0
+				|| ft_strcmp(files.files[i], "..") == 0))
 			continue ;
 		if (flags->long_format)
 			print_long_entry(&files, i, flags, cw);

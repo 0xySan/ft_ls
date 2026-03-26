@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:38:50 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 23:05:31 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	put_message_help()
 	ft_dprintf(1, "Sort entries alphabetically if none of -ftU is specified.\n\n");
 	ft_dprintf(1, "Mandatory arguments to long options are mandatory for short options too.\n");
 	ft_dprintf(1, "  -a, --all\t\t\tdo not ignore entries starting with .\n");
+	ft_dprintf(1, "  -A, --almost-all\t\tdo not list implied . and ..\n");
 	ft_dprintf(1, "      --color[=WHEN]\t\tcolorize the output; WHEN can be 'always' (default\n");
 	ft_dprintf(1, "\t\t\t\t  if omitted), 'auto', or 'never'; more info below\n");
 	ft_dprintf(1, "  -d, --directory\t\tlist directories themselves, not their contents\n");
@@ -64,6 +65,7 @@ void	init_flags(t_flags *flags)
 	flags->time_sort = 0;
 	flags->color = 0;
 	flags->all = 0;
+	flags->almost_all = 0;
 	flags->not_sorted = 0;
 	flags->size = 0;
 	flags->human_readable = 0;
@@ -85,7 +87,15 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 	if (av[i][j] == 'l')
 		flags->long_format = 1;
 	else if (av[i][j] == 'a')
+	{
 		flags->all = 1;
+		flags->almost_all = 0;
+	}
+	else if (av[i][j] == 'A')
+	{
+		flags->all = 0;
+		flags->almost_all = 1;
+	}
 	else if (av[i][j] == 'R')
 		flags->recursive = 1;
 	else if (av[i][j] == 'r')
@@ -156,7 +166,15 @@ int check_long_format_flags(char **av, t_flags *flags, int i)
 		flags->human_readable = 1;
 	}
 	else if (ft_strcmp(av[i], "--all") == 0)
+	{
 		flags->all = 1;
+		flags->almost_all = 0;
+	}
+	else if (ft_strcmp(av[i], "--almost-all") == 0)
+	{
+		flags->all = 0;
+		flags->almost_all = 1;
+	}
 	else if (ft_strcmp(av[i], "--directory") == 0)
 		flags->directory = 1;
 	else if (ft_strcmp(av[i], "--recursive") == 0)

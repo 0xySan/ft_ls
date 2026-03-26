@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/01 03:50:40 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 20:51:37 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:57:53 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,11 @@ void	do_other_flag(t_flags *flags, const char *filename)
 		if (flags->hyperlink && hyperlink)
 		{
 			write_hyperlink_open(hyperlink);
-			print_normal_name(filename, &st, flags);
+			print_normal_name(filename, filename, &st, flags);
 			write_hyperlink_close();
 		}
 		else
-			print_normal_name(filename, &st, flags);
+			print_normal_name(filename, filename, &st, flags);
 		print_symlink_with_hyperlink(st, filename, flags->color, flags, hyperlink);
 		free(hyperlink);
 		buf_write(1, "\n", 1);
