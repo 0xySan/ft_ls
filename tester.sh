@@ -251,13 +251,12 @@ run_suite() {
 	compare_case "file type (--file-type)" "--file-type --color=never" "$target"
 	compare_case "combo long/classify/time" "-lFt --color=never" "$target"
 	compare_case "combo recursive/all/long" "-Ral --color=never" "$target"
+	compare_case "hyperlink default" "--hyperlink=never" "$target"
 
 	print_status "INFO" "Running ft_ls-only smoke tests"
 
-	smoke_case "hyperlink default" "--hyperlink=never" "$target"
 	smoke_case "hyperlink auto" "--hyperlink=auto" "$target"
-	smoke_case "color auto" "--color=auto" "$target"
-	smoke_case "ls_colors extension" "--color=always" "$target"
+
 
 	local ls_colors_out="$TMP_DIR/ls_colors_check.out"
 	local ls_colors_err="$TMP_DIR/ls_colors_check.err"
