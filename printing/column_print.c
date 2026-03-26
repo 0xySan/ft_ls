@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/27 00:00:00 by etaquet           #+#    #+#             */
-/*   Updated: 2026/02/27 00:00:00 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 20:49:00 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,8 @@ static int	try_layout(char **names, int count, int nrows, int *cw, int tw,
 	return (total <= tw);
 }
 
-static void	print_col_pipe(char **nm, int cnt, struct stat *st, t_flags *flags,
-	int block_w)
+static void	print_col_pipe(char **nm, char **rp, int cnt, struct stat *st,
+	t_flags *flags, int block_w)
 {
 	int	i;
 
@@ -70,16 +70,16 @@ static void	print_col_pipe(char **nm, int cnt, struct stat *st, t_flags *flags,
 			continue ;
 		if (flags->size && st)
 			print_block_prefix(st[i], block_w, flags->human_readable, flags->size_unit);
-		if (flags->color && st)
-			print_color_name(nm[i], &st[i], flags->color);
+		if (st)
+			print_name_with_hyperlink(nm[i], rp ? rp[i] : nm[i], &st[i], flags);
 		else
-			ft_dprintf(1, "%s", nm[i]);
+			print_name_with_hyperlink(nm[i], rp ? rp[i] : nm[i], NULL, flags);
 		buf_write(1, "\n", 1);
 	}
 }
 
-static void	print_col_row(char **nm, struct stat *st, int *p, const char *cc,
-	int size, int block_w, int human, double size_unit)
+static void	print_col_row(char **nm, char **rp, struct stat *st, int *p,
+	const char *cc, int size, int block_w, t_flags *flags)
 {
 	int	idx;
 	int	name_len;
@@ -92,14 +92,12 @@ static void	print_col_row(char **nm, struct stat *st, int *p, const char *cc,
 	if (size && st)
 	{
 		prefix_len = block_w + 1;
-		print_block_prefix(st[idx], block_w, human, size_unit);
+		print_block_prefix(st[idx], block_w, flags->human_readable, flags->size_unit);
 	}
-	if (st && p[3])
-		cc = get_color_code(&st[idx]);
-	if (cc)
-		ft_dprintf(1, "%s%s\033[0m", cc, nm[idx]);
+	if (st)
+		print_name_with_hyperlink(nm[idx], rp ? rp[idx] : nm[idx], &st[idx], flags);
 	else
-		ft_dprintf(1, "%s", nm[idx]);
+		print_name_with_hyperlink(nm[idx], rp ? rp[idx] : nm[idx], NULL, flags);
 	if (p[2])
 		return ;
 	pad = (p[1] - (prefix_len + name_len)) + 2;
@@ -131,7 +129,7 @@ static int	get_blocks_width(struct stat *st, int cnt, int human, double size_uni
 	return (max);
 }
 
-void	print_columns(char **nm, int cnt, struct stat *st, t_flags *flags)
+void	print_columns(char **nm, char **rp, int cnt, struct stat *st, t_flags *flags)
 {
 	int	v[5];
 	int	*cw;
@@ -144,7 +142,7 @@ void	print_columns(char **nm, int cnt, struct stat *st, t_flags *flags)
 	if (flags->size)
 		block_w = get_blocks_width(st, cnt, flags->human_readable, flags->size_unit);
 	if (!isatty(1))
-		return (print_col_pipe(nm, cnt, st, flags, block_w));
+		return (print_col_pipe(nm, rp, cnt, st, flags, block_w));
 	if (flags->width > 0)
 		v[0] = flags->width;
 	else if (flags->width == 0)
@@ -179,9 +177,9 @@ void	print_columns(char **nm, int cnt, struct stat *st, t_flags *flags)
 			v[0] = v[4] * v[1] + v[3];
 			if (v[0] >= cnt || !nm[v[0]])
 				break ;
-			print_col_row(nm, st, (int [4]){v[0], cw[v[4]], (v[4] == v[2] - 1
+			print_col_row(nm, rp, st, (int [4]){v[0], cw[v[4]], (v[4] == v[2] - 1
 				|| (v[4] + 1) * v[1] + v[3] >= cnt), flags->color}, NULL,
-				flags->size, block_w, flags->human_readable, flags->size_unit);
+				flags->size, block_w, flags);
 		}
 		buf_write(1, "\n", 1);
 	}

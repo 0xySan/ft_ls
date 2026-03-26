@@ -6,21 +6,35 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:00:43 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 04:06:44 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 20:51:31 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ft_dprintf/ft_dprintf.h"
 #include "ft_ls.h"
 
 static void	print_long_entry(t_files *f, int i, t_flags *fl, t_colwidths cw)
 {
+	char	*hyperlink;
+
 	if (fl->size)
 		print_block_prefix(f->stats[i], cw.blocks_w, fl->human_readable, fl->size_unit);
 	getperms(f->stats[i], f->real_paths[i], fl, cw);
-	print_color_name(f->files[i], &f->stats[i], fl->color);
-	if (S_ISLNK(f->stats[i].st_mode))
-		getsymlink(f->stats[i], f->real_paths[i], fl->color);
+	hyperlink = NULL;
+	if (fl->hyperlink)
+		hyperlink = build_hyperlink_path(f->real_paths[i]);
+	if (fl->hyperlink && hyperlink)
+	{
+		write_hyperlink_open(hyperlink);
+		print_normal_name(f->files[i], &f->stats[i], fl);
+		write_hyperlink_close();
+	}
+	else
+		print_normal_name(f->files[i], &f->stats[i], fl);
+	print_symlink_with_hyperlink(f->stats[i], f->real_paths[i], fl->color,
+		fl, hyperlink);
 	buf_write(1, "\n", 1);
+	free(hyperlink);
 }
 
 static int	count_visible(t_files *files, int all)
@@ -45,14 +59,16 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 {
 	int			i;
 	char		**names;
+	char		**paths;
 	struct stat	*col_st;
 	int			n;
 	t_colwidths	cw;
 
 	n = count_visible(&files, flags->all);
 	names = malloc(sizeof(char *) * (n + 1));
+	paths = malloc(sizeof(char *) * (n + 1));
 	col_st = malloc(sizeof(struct stat) * (n + 1));
-	if (!names || !col_st)
+	if (!names || !paths || !col_st)
 		return ;
 	cw = (t_colwidths){0, 0, 0, 0, 0};
 	if (flags->long_format)
@@ -71,6 +87,7 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 		else
 		{
 			names[n] = files.files[i];
+			paths[n] = files.real_paths[i];
 			col_st[n] = files.stats[i];
 		}
 		n++;
@@ -78,10 +95,12 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	if (!flags->long_format)
 	{
 		names[n] = NULL;
-		print_columns(names, n, col_st, flags);
+		paths[n] = NULL;
+		print_columns(names, paths, n, col_st, flags);
 	}
 	*count = n;
 	free(names);
+	free(paths);
 	free(col_st);
 }
 

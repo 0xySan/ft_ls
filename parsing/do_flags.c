@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/01 03:50:40 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 03:50:41 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 20:51:37 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ void	do_other_flag(t_flags *flags, const char *filename)
 {
 	struct stat		st;
 	t_colwidths		cw;
+	char			*hyperlink;
 
 	if (lstat(filename, &st) != 0)
 		return ;
@@ -36,14 +37,24 @@ void	do_other_flag(t_flags *flags, const char *filename)
 			print_block_prefix(st, cw.blocks_w, flags->human_readable, flags->size_unit);
 		}
 		getperms(st, filename, flags, cw);
-		print_color_name(filename, &st, flags->color);
-		if (S_ISLNK(st.st_mode))
-			getsymlink(st, filename, flags->color);
+		hyperlink = NULL;
+		if (flags->hyperlink)
+			hyperlink = build_hyperlink_path(filename);
+		if (flags->hyperlink && hyperlink)
+		{
+			write_hyperlink_open(hyperlink);
+			print_normal_name(filename, &st, flags);
+			write_hyperlink_close();
+		}
+		else
+			print_normal_name(filename, &st, flags);
+		print_symlink_with_hyperlink(st, filename, flags->color, flags, hyperlink);
+		free(hyperlink);
 		buf_write(1, "\n", 1);
 	}
 	else
 	{
-		print_color_name(filename, &st, flags->color);
+		print_name_hyperlink(filename, &st, flags, filename);
 		if (!isatty(1))
 			buf_write(1, "\n", 1);
 		else
@@ -127,7 +138,7 @@ void	do_files(t_flags *flags)
 				do_other_flag(flags, non_dirs[i]);
 		}
 		else
-			print_columns(non_dirs, non_dir_count, nd_st, flags);
+			print_columns(non_dirs, non_dirs, non_dir_count, nd_st, flags);
 		first = 0;
 	}
 	i = -1;

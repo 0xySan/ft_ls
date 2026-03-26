@@ -11,4 +11,6 @@ FILES		=	main \
 				sorting/time_sort_files \
 				sorting/time_sort \
 				utils \
-				recursive_ls
+				recursive_ls \
+				check \
+				hyperlink

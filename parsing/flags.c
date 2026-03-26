@@ -6,15 +6,15 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/13 22:02:30 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 21:04:03 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../ft_ls.h"
 
-void	put_message_help(char *str)
+void	put_message_help()
 {
-	ft_dprintf(1, "Usage: %s [OPTION]... [FILE]...\n", str);
+	ft_dprintf(1, "Usage: ft_ls [OPTION]... [FILE]...\n");
 	ft_dprintf(1, "Options:\n");
 	ft_dprintf(1, "  -a\t\tdo not ignore entries starting with .\n");
 	ft_dprintf(1, "  -d\t\tlist directories themselves, not their contents\n");
@@ -38,7 +38,7 @@ void	put_message_help(char *str)
 	ft_dprintf(1, "  0  if OK,\n");
 	ft_dprintf(1, "  1  if minor problems (e.g., cannot access subdirectory),\n");
 	ft_dprintf(1, "  2  if serious trouble (e.g., cannot access command-line argument).\n\n");
-	ft_dprintf(1, "Report bugs to: etaquet@student.42lehavre.fr");
+	ft_dprintf(1, "Report bugs to: etaquet@student.42lehavre.fr\n");
 	buf_flush(1);
 }
 
@@ -62,6 +62,7 @@ void	init_flags(t_flags *flags)
 	flags->last_code = 0;
 	flags->width = -1;
 	flags->size_unit = 1024.0;
+	flags->hyperlink = 0;
 	flags->dir_name = NULL;
 	flags->dir_flag = false;
 }
@@ -112,7 +113,7 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 	}
 	else
 	{
-		ft_dprintf(2, "%s: illegal option -- '%c'\n", av[0], av[i][j]);
+		ft_dprintf(2, "ft_ls: illegal option -- '%c'\n", av[i][j]);
 		ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
 		return (1);
 	}
@@ -125,12 +126,12 @@ int	check_flags_loop(char **av, t_flags *flags, int i)
 
 	if (ft_strcmp(av[i], "--help") == 0)
 	{
-		put_message_help(av[0]);
+		put_message_help();
 		return (2);
 	}
 	if (ft_strcmp(av[i], "--version") == 0)
 	{
-		ft_dprintf(1, "%s: version 1.0\n\tMade with love by etaquet\n", av[0]);
+		ft_dprintf(1, "ft_ls: version 1.0\n\tMade with love by etaquet\n");
 		return (2);
 	}
 	if (ft_strcmp(av[i], "--color") == 0)
