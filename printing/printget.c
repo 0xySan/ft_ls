@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 18:41:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 03:54:40 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:25:47 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,24 +46,18 @@ void	print_mod_time(struct stat st)
 	char			*ft;
 	char			copy[26];
 	static time_t	now;
-	static int		year[4];
+	time_t			six_months;
 	int				i;
 
 	if (now == 0)
-	{
 		time(&now);
-		ft = ctime(&now);
-		i = -1;
-		while (++i < 4)
-			year[i] = ft[20 + i];
-	}
+	six_months = 15778476;
 	ft = ctime(&st.st_mtime);
 	i = -1;
 	while (++i < 25)
 		copy[i] = ft[i];
 	copy[25] = '\0';
-	if (copy[20] == year[0] && copy[21] == year[1]
-		&& copy[22] == year[2] && copy[23] == year[3])
+	if (st.st_mtime >= now - six_months && st.st_mtime <= now + 3600)
 		buf_write(1, copy + 4, 12);
 	else
 	{

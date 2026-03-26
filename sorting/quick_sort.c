@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 11:08:00 by etaquet           #+#    #+#             */
-/*   Updated: 2025/06/24 19:35:40 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:26:55 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,23 +23,14 @@ void	swap(char **a, char **b)
 
 int	str_lower_cmp(const char *a, const char *b)
 {
-	char	ca;
-	char	cb;
-
-	if (a[0] == '.')
-		a++;
-	if (b[0] == '.')
-		b++;
 	while (*a && *b)
 	{
-		ca = tolower((unsigned char)*a);
-		cb = tolower((unsigned char)*b);
-		if (ca != cb)
-			return (ca - cb);
+		if ((unsigned char)*a != (unsigned char)*b)
+			return ((unsigned char)*a - (unsigned char)*b);
 		a++;
 		b++;
 	}
-	return (tolower((unsigned char)*a) - tolower((unsigned char)*b));
+	return ((unsigned char)*a - (unsigned char)*b);
 }
 
 static int	partition(t_files *files, int low, int high)

@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 12:01:42 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:03:37 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:23:52 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ static int	has_user_xattr(const char *path)
 }
 
 #if __has_include(<sys/acl.h>)
-static void	print_acl_xattr(const char *path)
+static char	get_acl_xattr_mark(const char *path)
 {
 	acl_t	acl;
 
@@ -71,14 +71,21 @@ static void	print_acl_xattr(const char *path)
 	{
 		if (acl_entries(acl) > 3)
 		{
-			buf_write(1, "+", 1);
 			acl_free(acl);
-			return ;
+			return ('+');
 		}
 		acl_free(acl);
 	}
 	if (has_user_xattr(path))
-		buf_write(1, "@", 1);
+		return ('@');
+	return (' ');
+}
+#else
+static char	get_acl_xattr_mark(const char *path)
+{
+	if (has_user_xattr(path))
+		return ('@');
+	return (' ');
 }
 #endif
 
@@ -137,7 +144,7 @@ t_colwidths	init_colwidths(t_files *files, int owner, int all, int human,
 	t_colwidths	cw;
 	int			i;
 
-	cw = (t_colwidths){0, 0, 0, 0, 0};
+	cw = (t_colwidths){0, 0, 0, 0, 0, 0};
 	i = -1;
 	while (files->files[++i])
 	{
@@ -145,6 +152,8 @@ t_colwidths	init_colwidths(t_files *files, int owner, int all, int human,
 			continue ;
 		if (ft_strncmp(files->files[i], ".", 1) == 0 && !all)
 			continue ;
+		if (get_acl_xattr_mark(files->real_paths[i]) != ' ')
+			cw.acl_mark = 1;
 		update_cw(&cw, files->stats[i], owner, human, show_blocks, size_unit);
 	}
 	return (cw);
@@ -183,12 +192,13 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 	static char		gr_buf[256];
 	struct passwd	*pw;
 	struct group	*gr;
+	char		mark;
 
 	print_file_type(st.st_mode);
 	write_permbits(st.st_mode);
-	#if __has_include(<sys/acl.h>)
-	print_acl_xattr(path);
-	#endif
+	mark = get_acl_xattr_mark(path);
+	if (cw.acl_mark || mark != ' ')
+		buf_write(1, &mark, 1);
 	buf_write(1, " ", 1);
 	if (st.st_uid != last_uid)
 	{

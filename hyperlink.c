@@ -6,11 +6,35 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/26 20:48:16 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:03:43 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:45:26 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_ls.h"
+
+static void	print_file_type_suffix(struct stat *st, t_flags *flags)
+{
+	if ((!flags->file_type && !flags->classify) || !st)
+		return ;
+	if (S_ISDIR(st->st_mode))
+		buf_write(1, "/", 1);
+	else if (S_ISLNK(st->st_mode))
+	{
+		if (!flags->long_format)
+			buf_write(1, "@", 1);
+		return ;
+	}
+	else if (S_ISFIFO(st->st_mode))
+		buf_write(1, "|", 1);
+	else if (S_ISSOCK(st->st_mode))
+		buf_write(1, "=", 1);
+	#ifdef S_ISDOOR
+	else if (S_ISDOOR(st->st_mode))
+		buf_write(1, ">", 1); // Not widely supported, so check if it's defined first (Solaris/illumos-specific)
+	#endif
+	else if (st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH) && flags->file_type)
+		buf_write(1, "*", 1);
+}
 
 char	*build_hyperlink_path(const char *raw_path)
 {
@@ -64,9 +88,15 @@ void	write_hyperlink_close(void)
 void	print_normal_name(const char *name, struct stat *st, t_flags *flags)
 {
 	if (flags->color && st)
+	{
 		print_color_name(name, st, flags->color);
+		print_file_type_suffix(st, flags);
+	}
 	else
+	{
 		ft_dprintf(1, "%s", name);
+		print_file_type_suffix(st, flags);
+	}
 }
 
 void	print_name_with_hyperlink(const char *name, const char *path,
@@ -116,6 +146,7 @@ void	print_symlink_with_hyperlink(struct stat st, const char *path,
 		buf_write(1, cc, ft_strlen(cc));
 		buf_write(1, target, len);
 		buf_write(1, "\033[0m", 4);
+		print_file_type_suffix(&st_target, flags);
 	}
 	else
 		buf_write(1, target, len);

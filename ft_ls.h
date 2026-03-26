@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:03:16 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:35:04 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ typedef struct s_flags
 	int		width;
 	int		one;
 	int		hyperlink;
+	int		file_type;
+	int		classify;
 	double	size_unit;
 	char	**files;
 	int		file_count;
@@ -83,6 +85,7 @@ typedef struct s_colwidths
 	int		group_w;
 	int		size_w;
 	int		blocks_w;
+	int		acl_mark;
 }	t_colwidths;
 
 typedef struct s_dnode

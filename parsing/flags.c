@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 21:55:13 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:38:50 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ void	put_message_help()
 	ft_dprintf(1, "\t\t\t\t  if omitted), 'auto', or 'never'; more info below\n");
 	ft_dprintf(1, "  -d, --directory\t\tlist directories themselves, not their contents\n");
 	ft_dprintf(1, "  -f\t\t\t\tdo not sort, enable -aU, disable -ls --color\n");
+	ft_dprintf(1, "  -F, --classify\t\tappend indicator (one of */=>@|) to entries\n");
+	ft_dprintf(1, "      --file-type\t\tlikewise, except do not append '*'\n");
 	ft_dprintf(1, "  -g\t\t\t\tlike -l, but do not list owner\n");
 	ft_dprintf(1, "  -G, --no-group\t\tin a long listing, don't print group names\n");
 	ft_dprintf(1, "  -h, --human-readable\t\tprint sizes in human readable format\n");
@@ -36,9 +38,9 @@ void	put_message_help()
 	ft_dprintf(1, "  -t, --time\t\t\tsort by time\n");
 	ft_dprintf(1, "  -U\t\t\t\tdo not sort; list entries in directory order\n");
 	ft_dprintf(1, "  -w, --width=COLS\t\tset output width to COLS.  0 means no limit\n");
-	ft_dprintf(1, "  -1\t\t\t\tlist one file per line\n");
-	ft_dprintf(1, "      --help\t\t\tdisplay this help and exit\n");
-	ft_dprintf(1, "      --version\t\t\toutput version information and exit\n\n");
+	ft_dprintf(1, "  -1\t\t\t\tlist one file per line.  Avoid '\\n' with -q or -b\n");
+	ft_dprintf(1, "      --help\tdisplay this help and exit\n");
+	ft_dprintf(1, "      --version\toutput version information and exit\n\n");
 	ft_dprintf(1, "Using color to distinguish file types is disabled both by default and\n\
 with --color=never.  With --color=auto, ls emits color codes only when\n\
 standard output is connected to a terminal.  The LS_COLORS environment\n\
@@ -72,6 +74,8 @@ void	init_flags(t_flags *flags)
 	flags->width = -1;
 	flags->size_unit = 1024.0;
 	flags->hyperlink = 0;
+	flags->file_type = 0;
+	flags->classify = 0;
 	flags->dir_name = NULL;
 	flags->dir_flag = false;
 }
@@ -105,6 +109,11 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 		flags->all = 1;
 		flags->not_sorted = 1;
 		flags->color = 0;
+	}
+	else if (av[i][j] == 'F')
+	{
+		flags->file_type = 1;
+		flags->classify = 1;
 	}
 	else if (av[i][j] == 'U')
 		flags->not_sorted = 1;
@@ -165,6 +174,16 @@ int check_long_format_flags(char **av, t_flags *flags, int i)
 	}
 	else if (ft_strcmp(av[i], "--no-group") == 0)
 		flags->group = 1;
+	else if (ft_strcmp(av[i], "--file-type") == 0)
+	{
+		flags->file_type = 0;
+		flags->classify = 1;
+	}
+	else if (ft_strcmp(av[i], "--classify") == 0)
+	{
+		flags->file_type = 1;
+		flags->classify = 1;
+	}
 	else
 	{
 		ft_dprintf(2, "ft_ls: unrecognized option '%s'\n", av[i]);

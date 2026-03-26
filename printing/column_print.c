@@ -6,11 +6,41 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/27 00:00:00 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 20:49:00 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:45:25 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../ft_ls.h"
+
+static int	name_suffix_len(struct stat *st, t_flags *flags)
+{
+	if ((!flags->file_type && !flags->classify) || !st)
+		return (0);
+	if (S_ISDIR(st->st_mode))
+		return (1);
+	if (S_ISLNK(st->st_mode))
+		return (!flags->long_format);
+	if (S_ISFIFO(st->st_mode))
+		return (1);
+	if (S_ISSOCK(st->st_mode))
+		return (1);
+	#ifdef S_ISDOOR
+	if (S_ISDOOR(st->st_mode)) // Not widely supported, so check if it's defined first (Solaris/illumos-specific)
+		return (1);
+	#endif
+	if (st->st_mode & (S_IXUSR | S_IXGRP | S_IXOTH) && flags->file_type)
+		return (1);
+	return (0);
+}
+
+static int	display_name_len(const char *name, struct stat *st, t_flags *flags)
+{
+	int	len;
+
+	len = ft_strlen(name);
+	len += name_suffix_len(st, flags);
+	return (len);
+}
 
 static int	get_term_width(void)
 {
@@ -22,7 +52,7 @@ static int	get_term_width(void)
 }
 
 static int	try_layout(char **names, int count, int nrows, int *cw, int tw,
-	int size, int block_w)
+	int size, int block_w, struct stat *st, t_flags *flags)
 {
 	int	ncols;
 	int	c;
@@ -42,8 +72,10 @@ static int	try_layout(char **names, int count, int nrows, int *cw, int tw,
 		{
 			idx = c * nrows + r;
 			if (idx < count
-				&& (int)ft_strlen(names[idx]) + extra > cw[c])
-				cw[c] = (int)ft_strlen(names[idx]) + extra;
+				&& display_name_len(names[idx], st ? &st[idx] : NULL, flags)
+				+ extra > cw[c])
+				cw[c] = display_name_len(names[idx], st ? &st[idx] : NULL, flags)
+					+ extra;
 		}
 	}
 	total = 0;
@@ -87,7 +119,7 @@ static void	print_col_row(char **nm, char **rp, struct stat *st, int *p,
 	int	pad;
 
 	idx = p[0];
-	name_len = ft_strlen(nm[idx]);
+	name_len = display_name_len(nm[idx], st ? &st[idx] : NULL, flags);
 	prefix_len = 0;
 	if (size && st)
 	{
@@ -156,7 +188,7 @@ void	print_columns(char **nm, char **rp, int cnt, struct stat *st, t_flags *flag
 	v[1] = 0;
 	while (++v[1] <= cnt)
 	{
-		if (try_layout(nm, cnt, v[1], cw, v[0], flags->size, block_w))
+		if (try_layout(nm, cnt, v[1], cw, v[0], flags->size, block_w, st, flags))
 		{
 			found = 1;
 			break ;
@@ -164,7 +196,7 @@ void	print_columns(char **nm, char **rp, int cnt, struct stat *st, t_flags *flag
 	}
 	if (!found)
 	{
-		try_layout(nm, cnt, cnt, cw, 2147483647, flags->size, block_w);
+		try_layout(nm, cnt, cnt, cw, 2147483647, flags->size, block_w, st, flags);
 		v[1] = cnt;
 	}
 	v[2] = (cnt + v[1] - 1) / v[1];
