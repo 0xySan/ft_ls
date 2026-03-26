@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 18:34:03 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 20:29:03 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:03:35 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ static const char	*get_color_dir(mode_t m)
 	return ("\033[01;34m");
 }
 
-const char	*get_color_code(struct stat *st)
+static const char	*default_color_code(struct stat *st)
 {
 	mode_t	m;
 
@@ -146,13 +146,146 @@ const char	*get_color_code(struct stat *st)
 	return (NULL);
 }
 
+static const char	*ls_colors_lookup(const char *key)
+{
+	const char		*ls;
+	const char		*p;
+	int				klen;
+	static char		value[64];
+	int				i;
+
+	ls = getenv("LS_COLORS");
+	if (!ls || !*ls || !key || !*key)
+		return (NULL);
+	klen = ft_strlen(key);
+	p = ls;
+	while (*p)
+	{
+		if (ft_strncmp(p, key, klen) == 0 && p[klen] == '=')
+		{
+			p += klen + 1;
+			i = 0;
+			while (*p && *p != ':' && i < (int)sizeof(value) - 1)
+				value[i++] = *p++;
+			value[i] = '\0';
+			if (i == 0)
+				return (NULL);
+			return (value);
+		}
+		while (*p && *p != ':')
+			p++;
+		if (*p == ':')
+			p++;
+	}
+	return (NULL);
+}
+
+static const char	*ls_colors_ext_for_name(const char *name)
+{
+	const char	*base;
+	const char	*dot;
+	char		key[64];
+	const char	*raw;
+
+	if (!name)
+		return (NULL);
+	base = name;
+	while (*name)
+	{
+		if (*name == '/')
+			base = name + 1;
+		name++;
+	}
+	dot = ft_strrchr(base, '.');
+	if (!dot || !dot[1])
+		return (NULL);
+	key[0] = '*';
+	ft_strlcpy(key + 1, dot, sizeof(key) - 1);
+	raw = ls_colors_lookup(key);
+	if (raw)
+		return (raw);
+	return (ls_colors_lookup(dot));
+}
+
+static const char	*ls_color_raw_to_ansi(const char *raw)
+{
+	static char	ansi[80];
+	int			i;
+
+	if (!raw)
+		return (NULL);
+	i = 0;
+	ansi[i++] = '\033';
+	ansi[i++] = '[';
+	while (*raw && i < (int)sizeof(ansi) - 2)
+		ansi[i++] = *raw++;
+	ansi[i++] = 'm';
+	ansi[i] = '\0';
+	return (ansi);
+}
+
+static const char	*ls_colors_code_for(struct stat *st, const char *name)
+{
+	const char	*key;
+	const char	*raw;
+	mode_t		m;
+
+	m = st->st_mode;
+	raw = NULL;
+	if (S_ISREG(m))
+		raw = ls_colors_ext_for_name(name);
+	key = "fi";
+	if (S_ISDIR(m))
+	{
+		if ((m & S_ISVTX) && (m & S_IWOTH))
+			key = "tw";
+		else if (m & S_IWOTH)
+			key = "ow";
+		else if (m & S_ISVTX)
+			key = "st";
+		else
+			key = "di";
+	}
+	else if (S_ISLNK(m))
+		key = "ln";
+	else if (S_ISFIFO(m))
+		key = "pi";
+	else if (S_ISSOCK(m))
+		key = "so";
+	else if (S_ISBLK(m))
+		key = "bd";
+	else if (S_ISCHR(m))
+		key = "cd";
+	else if (m & S_ISUID)
+		key = "su";
+	else if (m & S_ISGID)
+		key = "sg";
+	else if (S_ISREG(m) && (m & (S_IXUSR | S_IXGRP | S_IXOTH)))
+		key = "ex";
+	if (!raw)
+		raw = ls_colors_lookup(key);
+	if (!raw)
+		return (NULL);
+	return (ls_color_raw_to_ansi(raw));
+}
+
+const char	*get_color_code(struct stat *st, const char *name)
+{
+	const char	*cc;
+
+	cc = ls_colors_code_for(st, name);
+	if (cc)
+		return (cc);
+	return (default_color_code(st));
+}
+
 void	print_color_name(const char *name, struct stat *st, int color)
 {
 	const char	*cc;
 
 	cc = NULL;
 	if (color && st)
-		cc = get_color_code(st);
+		cc = get_color_code(st, name);
 	if (cc)
 	{
 		buf_write(1, cc, ft_strlen(cc));

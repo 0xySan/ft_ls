@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/26 20:08:08 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 21:02:21 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 21:59:54 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,42 @@ int check_hyperlink_arg(const char *arg, t_flags *flags, int *i)
 	}
 	else if (ft_strcmp(arg, "--hyperlink") == 0)
 		flags->hyperlink = 1;
+	else
+		return -1;
+	(*i)++;
+	return 0;
+}
+
+int check_color_arg(const char *arg, t_flags *flags, int *i)
+{
+	if (ft_strncmp(arg, "--color=", 8) == 0)
+	{
+		if (!arg[8])
+		{
+			ft_dprintf(2, "%s: option requires an argument -- 'color'\n", arg);
+			ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
+			exit_help(1, flags, flags->file_count);
+		}
+		char *val = (char *)arg + 8;
+		if (strcmp(val, "always") == 0 || strcmp(val, "yes") == 0 || strcmp(val, "force") == 0)
+			flags->color = 1;
+		else if (strcmp(val, "auto") == 0 || strcmp(val, "if-tty") == 0 || strcmp(val, "tty") == 0)
+			flags->color = 2;
+		else if (strcmp(val, "never") == 0 || strcmp(val, "no") == 0 || strcmp(val, "none") == 0)
+			flags->color = 0;
+		else
+		{
+			ft_dprintf(2, "%s: invalid argument '%s' for '--color'\n", arg, val);
+			ft_dprintf(2, "Valid arguments are:\n");
+			ft_dprintf(2, "  - 'always', 'yes', 'force'\n");
+			ft_dprintf(2, "  - 'never', 'no', 'none'\n");
+			ft_dprintf(2, "  - 'auto', 'tty', 'if-tty'\n");
+			ft_dprintf(2, "Try 'ft_ls --help' for more information.\n");
+			exit_help(1, flags, flags->file_count);
+		}
+	}
+	else if (ft_strcmp(arg, "--color") == 0)
+		flags->color = 1;
 	else
 		return -1;
 	(*i)++;

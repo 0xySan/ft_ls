@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 20:51:11 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:03:16 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,21 +136,20 @@ char 		*get_size_human_readable(off_t size, double size_unit);
 char		*getblocksize_human_readable(t_files *files, double size_unit);
 char		*get_blocks_human_readable(size_t blocks, double size_unit);
 void		print_block_prefix(struct stat st, int width, int human, double size_unit);
-const char	*get_color_code(struct stat *st);
+const char	*get_color_code(struct stat *st, const char *name);
 
 // check.c
 
-int		check_width_arg(const char *arg, const char *argtwo, t_flags *flags, int *i);
-int		check_hyperlink_arg(const char *arg, t_flags *flags, int *i);
-
+int			check_width_arg(const char *arg, const char *argtwo, t_flags *flags, int *i);
+int			check_hyperlink_arg(const char *arg, t_flags *flags, int *i);
+int			check_color_arg(const char *arg, t_flags *flags, int *i);
 // hyperlink.c
-char	*build_hyperlink_path(const char *raw_path);
-void	print_name_hyperlink(const char *name, struct stat *st, t_flags *flags, const char *path);
-void	write_hyperlink_open(const char *hyperlink);
-void	write_hyperlink_close(void);
-void	print_normal_name(const char *name, struct stat *st, t_flags *flags);
-void	print_name_with_hyperlink(const char *name, const char *path, struct stat *st, t_flags *flags);
-void	print_symlink_with_hyperlink(struct stat st, const char *path,
-			int color, t_flags *flags, const char *hyperlink);
+char		*build_hyperlink_path(const char *raw_path);
+void		print_name_hyperlink(const char *name, struct stat *st, t_flags *flags, const char *path);
+void		write_hyperlink_open(const char *hyperlink);
+void		write_hyperlink_close(void);
+void		print_normal_name(const char *name, struct stat *st, t_flags *flags);
+void		print_name_with_hyperlink(const char *name, const char *path, struct stat *st, t_flags *flags);
+void		print_symlink_with_hyperlink(struct stat st, const char *path, int color, t_flags *flags, const char *hyperlink);
 
 #endif

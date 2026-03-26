@@ -20,7 +20,8 @@ We recreate it in the mandatory part only with the following flags :
 - `-U` : do not sort; list entries in directory order, but can be nullified with another `-t` after it.
 - `--width=COLS` : set output width to COLS. 0 mean no limits.
 - `--help` : display an help message just like this.
-- `--color` : enable colorized output, so like folders and executables, etc.. will have colors to be distinguable.
+- `--color[=WHEN]` : colorize output (`always` if omitted), with `auto` only when stdout is a terminal and `never` to disable it.
+- `LS_COLORS` is supported to customize file type colors (you can generate it with `dircolors`).
 
 Even thought this subject can be done without doing the norminette I followed most of it to make the challenge more difficult. Except for bonuses as they can be pretty hard.
 

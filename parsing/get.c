@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 12:01:42 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/01 04:03:45 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:03:37 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	getsymlink(struct stat st, const char *path, int color)
 			buf_write(1, " -> ", 4);
 			cc = NULL;
 			if (color && stat(path, &st_target) == 0)
-				cc = get_color_code(&st_target);
+				cc = get_color_code(&st_target, target);
 			if (cc)
 			{
 				buf_write(1, cc, ft_strlen(cc));

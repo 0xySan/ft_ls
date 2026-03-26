@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/26 20:48:16 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 20:51:23 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 22:03:43 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ void	print_symlink_with_hyperlink(struct stat st, const char *path,
 		write_hyperlink_open(hyperlink);
 	cc = NULL;
 	if (color && stat(path, &st_target) == 0)
-		cc = get_color_code(&st_target);
+		cc = get_color_code(&st_target, target);
 	if (cc)
 	{
 		buf_write(1, cc, ft_strlen(cc));

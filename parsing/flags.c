@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 21:04:03 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 21:55:13 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,25 +15,34 @@
 void	put_message_help()
 {
 	ft_dprintf(1, "Usage: ft_ls [OPTION]... [FILE]...\n");
-	ft_dprintf(1, "Options:\n");
-	ft_dprintf(1, "  -a\t\tdo not ignore entries starting with .\n");
-	ft_dprintf(1, "  -d\t\tlist directories themselves, not their contents\n");
-	ft_dprintf(1, "  -f\t\tdo not sort, enable -aU, disable -ls --color\n");
-	ft_dprintf(1, "  -g\t\tlike -l, but do not list owner\n");
-	ft_dprintf(1, "  -G\t\tin a long listing, don't print group names\n");
-	ft_dprintf(1, "  -h\t\tprint sizes in human readable format\n");
-	ft_dprintf(1, "     --si\tlikewise, but use powers of 1000 not 1024\n");
-	ft_dprintf(1, "  -l\t\tuse a long listing format\n");
-	ft_dprintf(1, "  -R\t\tlist subdirectories recursively\n");
-	ft_dprintf(1, "  -r\t\treverse order while sorting\n");
-	ft_dprintf(1, "  -s\t\tprint size of each file in blocks\n");
-	ft_dprintf(1, "  -t\t\tsort by time\n");
-	ft_dprintf(1, "  -U\t\tdo not sort; list entries in directory order\n");
-	ft_dprintf(1, "  -1\t\tlist one file per line\n");
-	ft_dprintf(1, "  --width=COLS\tset output width to COLS.  0 means no limit\n");
-	ft_dprintf(1, "  --help\tdisplay this help and exit\n");
-	ft_dprintf(1, "  --color\tenable colorized output\n");
-	ft_dprintf(1, "  --version\toutput version information and exit\n");
+	ft_dprintf(1, "List information about the FILEs (the current directory by default).\n");
+	ft_dprintf(1, "Sort entries alphabetically if none of -ftU is specified.\n\n");
+	ft_dprintf(1, "Mandatory arguments to long options are mandatory for short options too.\n");
+	ft_dprintf(1, "  -a, --all\t\t\tdo not ignore entries starting with .\n");
+	ft_dprintf(1, "      --color[=WHEN]\t\tcolorize the output; WHEN can be 'always' (default\n");
+	ft_dprintf(1, "\t\t\t\t  if omitted), 'auto', or 'never'; more info below\n");
+	ft_dprintf(1, "  -d, --directory\t\tlist directories themselves, not their contents\n");
+	ft_dprintf(1, "  -f\t\t\t\tdo not sort, enable -aU, disable -ls --color\n");
+	ft_dprintf(1, "  -g\t\t\t\tlike -l, but do not list owner\n");
+	ft_dprintf(1, "  -G, --no-group\t\tin a long listing, don't print group names\n");
+	ft_dprintf(1, "  -h, --human-readable\t\tprint sizes in human readable format\n");
+	ft_dprintf(1, "      --si\t\t\tlikewise, but use powers of 1000 not 1024\n");
+	ft_dprintf(1, "      --hyperlink[=WHEN]\thyperlink file names; WHEN can be 'always'\n");
+	ft_dprintf(1, "\t\t\t\t  (default if omitted), 'auto', or 'never'\n");
+	ft_dprintf(1, "  -l\t\t\t\tuse a long listing format\n");
+	ft_dprintf(1, "  -R, --recursive\t\tlist subdirectories recursively\n");
+	ft_dprintf(1, "  -r, --reverse\t\t\treverse order while sorting\n");
+	ft_dprintf(1, "  -s, --size\t\t\tprint size of each file in blocks\n");
+	ft_dprintf(1, "  -t, --time\t\t\tsort by time\n");
+	ft_dprintf(1, "  -U\t\t\t\tdo not sort; list entries in directory order\n");
+	ft_dprintf(1, "  -w, --width=COLS\t\tset output width to COLS.  0 means no limit\n");
+	ft_dprintf(1, "  -1\t\t\t\tlist one file per line\n");
+	ft_dprintf(1, "      --help\t\t\tdisplay this help and exit\n");
+	ft_dprintf(1, "      --version\t\t\toutput version information and exit\n\n");
+	ft_dprintf(1, "Using color to distinguish file types is disabled both by default and\n\
+with --color=never.  With --color=auto, ls emits color codes only when\n\
+standard output is connected to a terminal.  The LS_COLORS environment\n\
+variable can change the settings.  Use the dircolors command to set it.\n\n");
 	ft_dprintf(1, "Exit status:\n");
 	ft_dprintf(1, "  0  if OK,\n");
 	ft_dprintf(1, "  1  if minor problems (e.g., cannot access subdirectory),\n");
@@ -120,34 +129,60 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 	return (0);
 }
 
-int	check_flags_loop(char **av, t_flags *flags, int i)
+int check_long_format_flags(char **av, t_flags *flags, int i)
 {
-	int	j;
-
 	if (ft_strcmp(av[i], "--help") == 0)
 	{
 		put_message_help();
 		return (2);
 	}
-	if (ft_strcmp(av[i], "--version") == 0)
+	else if (ft_strcmp(av[i], "--version") == 0)
 	{
 		ft_dprintf(1, "ft_ls: version 1.0\n\tMade with love by etaquet\n");
 		return (2);
 	}
-	if (ft_strcmp(av[i], "--color") == 0)
-	{
-		flags->color = 1;
-		return (0);
-	}
-	if (ft_strcmp(av[i], "--si") == 0)
+	else if (ft_strcmp(av[i], "--si") == 0)
 	{
 		flags->size_unit = 1000.0;
 		flags->human_readable = 1;
-		return (0);
 	}
+	else if (ft_strcmp(av[i], "--all") == 0)
+		flags->all = 1;
+	else if (ft_strcmp(av[i], "--directory") == 0)
+		flags->directory = 1;
+	else if (ft_strcmp(av[i], "--recursive") == 0)
+		flags->recursive = 1;
+	else if (ft_strcmp(av[i], "--reverse") == 0)
+		flags->reverse = 1;
+	else if (ft_strcmp(av[i], "--time") == 0)
+		flags->time_sort = 1;
+	else if (ft_strcmp(av[i], "--size") == 0)
+		flags->size = 1;
+	else if (ft_strcmp(av[i], "--human-readable") == 0)
+	{
+		flags->human_readable = 1;
+		flags->size_unit = 1024.0;
+	}
+	else if (ft_strcmp(av[i], "--no-group") == 0)
+		flags->group = 1;
+	else
+	{
+		ft_dprintf(2, "ft_ls: unrecognized option '%s'\n", av[i]);
+		ft_dprintf(2, "Try 'ft_ls --help' for more informations.\n");
+		return (1);
+	}
+	return (0);
+}
+
+int	check_flags_loop(char **av, t_flags *flags, int i)
+{
+	int	j;
+
 	j = 1;
 	while (av[i][j])
 	{
+		if (strncmp(av[i], "--", 2) == 0)
+			return check_long_format_flags(av, flags, i);
 		if (check_flags(av, flags, i, j))
 			return (1);
 		j++;

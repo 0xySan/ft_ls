@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:04:49 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 21:03:53 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/03/26 21:59:55 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,9 @@ void	main_loop(int ac, char **av, t_flags *flags)
 			if (exit_code == 0)
 				continue ;
 			exit_code = check_hyperlink_arg(av[i], flags, &i);
-			if (exit_code == 1)
-				exit_help(exit_code, flags, flags->file_count);
+			if (exit_code == 0)
+				continue ;
+			exit_code = check_color_arg(av[i], flags, &i);
 			if (exit_code == 0)
 				continue ;
 			exit_help(check_flags_loop(av, flags, i), flags, flags->file_count);
@@ -46,6 +47,8 @@ void	main_loop(int ac, char **av, t_flags *flags)
 	if (flags->file_count < 1 && flags->error_code == 0)
 		flags->files[flags->file_count++] = ft_strdup(".");
 	flags->files[flags->file_count] = NULL;
+	if (flags->color == 2)
+		flags->color = isatty(1);
 }
 
 int	main(int ac, char **av)
