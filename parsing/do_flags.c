@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/01 03:50:40 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 22:57:53 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 16:02:20 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	do_other_flag(t_flags *flags, const char *filename)
 
 	if (lstat(filename, &st) != 0)
 		return ;
-	if (flags->long_format)
+	if (flags->long_format || flags->numeric)
 	{
 		cw = (t_colwidths){0, 0, 0, 0, 0};
 		if (flags->human_readable)
@@ -131,7 +131,7 @@ void	do_files(t_flags *flags)
 			while (++i < non_dir_count)
 				lstat(non_dirs[i], &nd_st[i]);
 		}
-		if (flags->long_format)
+		if (flags->long_format || flags->numeric)
 		{
 			i = -1;
 			while (non_dirs[++i])

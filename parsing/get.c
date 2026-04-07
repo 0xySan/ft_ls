@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 12:01:42 by etaquet           #+#    #+#             */
-/*   Updated: 2026/04/07 15:37:28 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 16:08:48 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,8 @@ static char	get_acl_xattr_mark(const char *path)
 }
 #endif
 
-static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
-	int show_blocks, double size_unit)
+static void	update_cw(t_colwidths *cw, struct stat st, int owner, int numeric,
+	int human, int show_blocks, double size_unit)
 {
 	int				tmp;
 	static uid_t	lu = (uid_t)-1;
@@ -124,8 +124,13 @@ static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
 	}
 	if (st.st_gid != lg)
 	{
-		struct group *gr = getgrgid(st.st_gid);
-		gr_len = gr ? ft_strlen(gr->gr_name) : 1;
+		if (numeric)
+			gr_len = count_digits((unsigned long)st.st_gid);
+		else
+		{
+			struct group *gr = getgrgid(st.st_gid);
+			gr_len = gr ? ft_strlen(gr->gr_name) : 1;
+		}
 		lg = st.st_gid;
 	}
 	if (gr_len > cw->group_w)
@@ -134,8 +139,13 @@ static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
 	{
 		if (st.st_uid != lu)
 		{
-			struct passwd *pw = getpwuid(st.st_uid);
-			pw_len = pw ? ft_strlen(pw->pw_name) : 1;
+			if (numeric)
+				pw_len = count_digits((unsigned long)st.st_uid);
+			else
+			{
+				struct passwd *pw = getpwuid(st.st_uid);
+				pw_len = pw ? ft_strlen(pw->pw_name) : 1;
+			}
 			lu = st.st_uid;
 		}
 		if (pw_len > cw->owner_w)
@@ -144,7 +154,7 @@ static void	update_cw(t_colwidths *cw, struct stat st, int owner, int human,
 }
 
 t_colwidths	init_colwidths(t_files *files, int owner, int all,
-	int almost_all, int human, int show_blocks, double size_unit)
+	int almost_all, int numeric, int human, int show_blocks, double size_unit)
 {
 	t_colwidths	cw;
 	int			i;
@@ -162,7 +172,7 @@ t_colwidths	init_colwidths(t_files *files, int owner, int all,
 			continue ;
 		if (get_acl_xattr_mark(files->real_paths[i]) != ' ')
 			cw.acl_mark = 1;
-		update_cw(&cw, files->stats[i], owner, human, show_blocks, size_unit);
+		update_cw(&cw, files->stats[i], owner, numeric, human, show_blocks, size_unit);
 	}
 	return (cw);
 }
@@ -192,24 +202,14 @@ static void	write_permbits(mode_t m)
 	buf_write(1, p, 9);
 }
 
-void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
+static void	getids(struct stat st, char *pw_buf, char *gr_buf, char *author_buf)
 {
 	static uid_t	last_uid = (uid_t)-1;
 	static gid_t	last_gid = (gid_t)-1;
 	static uid_t	last_oid = (uid_t)-1;
-	static char		pw_buf[256];
-	static char		gr_buf[256];
-	static char		author_buf[256];
 	struct passwd	*pw;
 	struct group	*gr;
-	char		mark;
 
-	print_file_type(st.st_mode);
-	write_permbits(st.st_mode);
-	mark = get_acl_xattr_mark(path);
-	if (cw.acl_mark || mark != ' ')
-		buf_write(1, &mark, 1);
-	buf_write(1, " ", 1);
 	if (st.st_uid != last_uid)
 	{
 		pw = getpwuid(st.st_uid);
@@ -261,6 +261,65 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 			author_buf[0] = '?', author_buf[1] = '\0';
 		last_oid = st.st_uid;
 	}
+}
+
+static void	getids_numeric(struct stat st, char *pw_buf, char *gr_buf, char *author_buf)
+{
+	static uid_t	last_uid = (uid_t)-1;
+	static gid_t	last_gid = (gid_t)-1;
+	static uid_t	last_oid = (uid_t)-1;
+	struct passwd	*pw;
+	struct group	*gr;
+
+	if (st.st_uid != last_uid)
+	{
+		char *tmp = ft_itoa(st.st_uid);
+		if (tmp)
+		{
+			ft_strcpy(pw_buf, tmp);
+			free(tmp);
+		}
+		last_uid = st.st_uid;
+	}
+	if (st.st_gid != last_gid)
+	{
+		char *tmp = ft_itoa(st.st_gid);
+		if (tmp)
+		{
+			ft_strcpy(gr_buf, tmp);
+			free(tmp);
+		}
+		last_gid = st.st_gid;
+	}
+	if (st.st_uid != last_oid)
+	{
+		char *tmp = ft_itoa(st.st_uid);
+		if (tmp)
+		{
+			ft_strcpy(author_buf, tmp);
+			free(tmp);
+		}
+		last_oid = st.st_uid;
+	}
+}
+
+void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
+{
+	static char		pw_buf[256];
+	static char		gr_buf[256];
+	static char		author_buf[256];
+	char			mark;
+
+	print_file_type(st.st_mode);
+	write_permbits(st.st_mode);
+	mark = get_acl_xattr_mark(path);
+	if (cw.acl_mark || mark != ' ')
+		buf_write(1, &mark, 1);
+	buf_write(1, " ", 1);
+	if (flags->numeric)
+		getids_numeric(st, pw_buf, gr_buf, author_buf);
+	else
+		getids(st, pw_buf, gr_buf, author_buf);
 	print_padded_num((unsigned long)st.st_nlink, cw.nlink_w);
 	buf_write(1, " ", 1);
 	if (!flags->owner)

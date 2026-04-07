@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:00:43 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 23:05:43 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 16:05:52 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,11 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 	if (!names || !paths || !col_st)
 		return ;
 	cw = (t_colwidths){0, 0, 0, 0, 0};
-	if (flags->long_format)
+	if (flags->long_format || flags->numeric)
 		cw = init_colwidths(&files, flags->owner, flags->all,
 				flags->almost_all,
-				flags->human_readable, flags->size, flags->size_unit);
+				flags->numeric, flags->human_readable, flags->size,
+				flags->size_unit);
 	n = 0;
 	i = -1;
 	while (files.files[++i])
@@ -89,7 +90,7 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 				|| ft_strcmp(files.files[i], ".") == 0
 				|| ft_strcmp(files.files[i], "..") == 0))
 			continue ;
-		if (flags->long_format)
+		if (flags->long_format || flags->numeric)
 			print_long_entry(&files, i, flags, cw);
 		else
 		{
@@ -99,7 +100,7 @@ static void	print_file_loop(t_files files, t_flags *flags, int *count)
 		}
 		n++;
 	}
-	if (!flags->long_format)
+	if (!flags->long_format && !flags->numeric)
 	{
 		names[n] = NULL;
 		paths[n] = NULL;
@@ -136,7 +137,7 @@ static int	opendir_and_print(const char *base_path, t_flags *flags, t_files *fil
 	if (flags->file_count - 1 >= 1 || flags->recursive)
 		ft_dprintf(1, "%s:\n", base_path);
 	malloc_and_put_files(files, dir, flags, base_path);
-	if (flags->long_format || flags->size)
+	if (flags->long_format || flags->size || flags->numeric)
 	{
 		if (flags->human_readable)
 			ft_dprintf(1, "total %s\n", getblocksize_human_readable(files, flags->size_unit));

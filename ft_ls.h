@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2026/04/07 15:36:06 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 16:00:19 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ typedef struct s_flags
 	int		hyperlink;
 	int		file_type;
 	int		classify;
+	int		numeric;
 	double	size_unit;
 	char	**files;
 	int		file_count;
@@ -108,7 +109,7 @@ int			is_symlink(const char *path);
 int			is_directory(const char *path);
 int			check_flags_loop(char **av, t_flags *flags, int i);
 t_colwidths	init_colwidths(t_files *files, int group, int all,
-				int almost_all, int human, int show_blocks, double size_unit);
+				int almost_all, int numeric, int human, int show_blocks, double size_unit);
 
 /* PRINTING DIRECTORY */
 

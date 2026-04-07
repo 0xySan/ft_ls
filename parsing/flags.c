@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/04/07 15:48:11 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 16:03:32 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void	put_message_help()
 	ft_dprintf(1, "      --hyperlink[=WHEN]\thyperlink file names; WHEN can be 'always'\n");
 	ft_dprintf(1, "\t\t\t\t  (default if omitted), 'auto', or 'never'\n");
 	ft_dprintf(1, "  -l\t\t\t\tuse a long listing format\n");
+	ft_dprintf(1, "  -n, --numeric-uid-gid\t\tlike -l, but list numeric user and group IDs\n");
 	ft_dprintf(1, "  -R, --recursive\t\tlist subdirectories recursively\n");
 	ft_dprintf(1, "  -r, --reverse\t\t\treverse order while sorting\n");
 	ft_dprintf(1, "  -s, --size\t\t\tprint size of each file in blocks\n");
@@ -80,6 +81,7 @@ void	init_flags(t_flags *flags)
 	flags->file_type = 0;
 	flags->classify = 0;
 	flags->author = 0;
+	flags->numeric = 0;
 	flags->dir_name = NULL;
 	flags->dir_flag = false;
 }
@@ -131,6 +133,8 @@ int	check_flags(char **av, t_flags *flags, int i, int j)
 		flags->not_sorted = 1;
 	else if (av[i][j] == 's')
 		flags->size = 1;
+	else if (av[i][j] == 'n')
+		flags->numeric = 1;
 	else if (av[i][j] == 'h')
 	{
 		flags->human_readable = 1;
@@ -183,6 +187,8 @@ int check_long_format_flags(char **av, t_flags *flags, int i)
 		flags->recursive = 1;
 	else if (ft_strcmp(av[i], "--reverse") == 0)
 		flags->reverse = 1;
+	else if (ft_strcmp(av[i], "--numeric-uid-gid") == 0)
+		flags->numeric = 1;
 	else if (ft_strcmp(av[i], "--time") == 0)
 		flags->time_sort = 1;
 	else if (ft_strcmp(av[i], "--size") == 0)
