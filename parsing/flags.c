@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 19:03:33 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 23:05:31 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 15:48:11 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ void	put_message_help()
 	ft_dprintf(1, "Mandatory arguments to long options are mandatory for short options too.\n");
 	ft_dprintf(1, "  -a, --all\t\t\tdo not ignore entries starting with .\n");
 	ft_dprintf(1, "  -A, --almost-all\t\tdo not list implied . and ..\n");
+	ft_dprintf(1, "      --author\t\t\twith -l, print the author of each file\n");
 	ft_dprintf(1, "      --color[=WHEN]\t\tcolorize the output; WHEN can be 'always' (default\n");
 	ft_dprintf(1, "\t\t\t\t  if omitted), 'auto', or 'never'; more info below\n");
 	ft_dprintf(1, "  -d, --directory\t\tlist directories themselves, not their contents\n");
@@ -78,6 +79,7 @@ void	init_flags(t_flags *flags)
 	flags->hyperlink = 0;
 	flags->file_type = 0;
 	flags->classify = 0;
+	flags->author = 0;
 	flags->dir_name = NULL;
 	flags->dir_flag = false;
 }
@@ -185,6 +187,8 @@ int check_long_format_flags(char **av, t_flags *flags, int i)
 		flags->time_sort = 1;
 	else if (ft_strcmp(av[i], "--size") == 0)
 		flags->size = 1;
+	else if (ft_strcmp(av[i], "--author") == 0)
+		flags->author = 1;
 	else if (ft_strcmp(av[i], "--human-readable") == 0)
 	{
 		flags->human_readable = 1;

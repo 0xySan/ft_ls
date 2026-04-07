@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 15:09:27 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 23:05:27 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 15:36:06 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ typedef struct s_flags
 	int		color;
 	int		all;
 	int		almost_all;
+	int		author;
 	int		width;
 	int		one;
 	int		hyperlink;

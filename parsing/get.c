@@ -6,7 +6,7 @@
 /*   By: etaquet <etaquet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 12:01:42 by etaquet           #+#    #+#             */
-/*   Updated: 2026/03/26 23:05:48 by etaquet          ###   ########.fr       */
+/*   Updated: 2026/04/07 15:37:28 by etaquet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,8 +196,10 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 {
 	static uid_t	last_uid = (uid_t)-1;
 	static gid_t	last_gid = (gid_t)-1;
+	static uid_t	last_oid = (uid_t)-1;
 	static char		pw_buf[256];
 	static char		gr_buf[256];
+	static char		author_buf[256];
 	struct passwd	*pw;
 	struct group	*gr;
 	char		mark;
@@ -242,6 +244,23 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 			gr_buf[0] = '?', gr_buf[1] = '\0';
 		last_gid = st.st_gid;
 	}
+	if (st.st_uid != last_oid)
+	{
+		pw = getpwuid(st.st_uid);
+		if (pw)
+		{
+			int j = 0;
+			while (pw->pw_name[j] && j < 255)
+			{
+				author_buf[j] = pw->pw_name[j];
+				j++;
+			}
+			author_buf[j] = '\0';
+		}
+		else
+			author_buf[0] = '?', author_buf[1] = '\0';
+		last_oid = st.st_uid;
+	}
 	print_padded_num((unsigned long)st.st_nlink, cw.nlink_w);
 	buf_write(1, " ", 1);
 	if (!flags->owner)
@@ -252,6 +271,11 @@ void	getperms(struct stat st, const char *path, t_flags *flags, t_colwidths cw)
 	if (!flags->group)
 	{
 		print_padded_str(gr_buf, cw.group_w);
+		buf_write(1, " ", 1);
+	}
+	if (flags->author)
+	{
+		print_padded_str(author_buf, cw.owner_w);
 		buf_write(1, " ", 1);
 	}
 	if (flags->human_readable)
